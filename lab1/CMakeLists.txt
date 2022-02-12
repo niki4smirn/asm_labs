@@ -1,6 +1,23 @@
-cmake_minimum_required(VERSION 3.21)
-project(lab1)
+cmake_minimum_required(VERSION 3.7)
 
-set(CMAKE_CXX_STANDARD 20)
+project(asm_lab)
 
-add_executable(lab1 main.cpp)
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
+
+include(FetchContent)
+FetchContent_Declare(
+        googletest
+        URL https://github.com/google/googletest/archive/609281088cfefc76f9d0ce82e1ff6c30cc3591e5.zip
+)
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(googletest)
+
+set(CMAKE_CXX_FLAGS ${CMAKE_EXE_LINKER_FLAGS} "-fno-omit-frame-pointer")
+set(CMAKE_EXE_LINKER_FLAGS ${CMAKE_EXE_LINKER_FLAGS} "-no-pie")
+
+enable_language(ASM_NASM)
+
+add_executable(solution_tests solution.asm tests.cpp)
+
+target_link_libraries(solution_tests gtest_main)
