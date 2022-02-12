@@ -16,7 +16,32 @@ Sum:                ; Data location:
                     add rax, rdx
                     ret
 
-CheckOverflow:      ; YOUR_CODE_HERE
+CheckOverflow:      mov r8, 0
+                    mov rcx, 0
+                    mov rax, rdi
+
+                    ; x^2
+                    imul rdi
+                    seto cl
+                    or r8, rcx
+
+                    ; x^3
+                    imul rdi
+                    seto cl
+                    or r8, rcx
+
+                    ; x^4
+                    imul rdi
+                    seto cl
+                    or r8, rcx
+
+                    mov rax, rsi
+                    ; y^2
+                    imul rsi
+                    seto cl
+                    or r8, rcx
+
+                    mov rax, r8
                     ret
 
 ComputeFn:          ; YOUR_CODE_HERE
