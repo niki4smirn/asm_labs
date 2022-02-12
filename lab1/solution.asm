@@ -10,8 +10,10 @@ Sum:                ; Data location:
                     ;           ( x,  y ) --> result
                     ; Unix/WSL: (EDI, SIL) --> RAX
                     ; Windows:  (ECX, DIL) --> RAX
-                    ;
-                    ; YOUR_CODE_HERE
+
+                    movsx rax, edi
+                    movzx rdx, sil
+                    add rax, rdx
                     ret
 
 CheckOverflow:      ; YOUR_CODE_HERE
