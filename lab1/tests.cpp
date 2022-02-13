@@ -31,8 +31,8 @@ int64_t RandomGenerator::GetValue() {
 }
 
 TEST(Sum, Simple) {
-  ASSERT_EQ(Sum(0, 0), 0);
-  ASSERT_EQ(Sum(2, 2), 4);
+  EXPECT_EQ(Sum(0, 0), 0);
+  EXPECT_EQ(Sum(2, 2), 4);
 }
 
 TEST(Sum, EdgeCases) {
@@ -58,7 +58,7 @@ TEST(Sum, Generator) {
   for (int _ = 0; _ < kTestsCount; ++_) {
     for (int y = 0; y <= std::numeric_limits<uint8_t>::max(); ++y) {
       int64_t x = gen.GetValue();
-      EXPECT_EQ(Sum(x, y), x + y);
+      ASSERT_EQ(Sum(x, y), x + y) << x << ' ' << y;
     }
   }
 }
@@ -108,7 +108,7 @@ void OverflowGeneratorTest(int32_t min_val, int32_t max_val) {
     bool ans = false;
     ans |= !IsInBounds(x, -overflow::edge::kFourth, overflow::edge::kFourth);
     ans |= !IsInBounds(y, -overflow::edge::kSecond, overflow::edge::kSecond);
-    ASSERT_EQ(CheckOverflow(x, y), ans);
+    ASSERT_EQ(CheckOverflow(x, y), ans) << x << ' ' << y;
   }
 }
 
@@ -144,7 +144,7 @@ void ComputeFnGeneratorTest(
     int64_t y = gen_y.GetValue();
     if (x - y * y != 0) {
       int64_t res = (2 + x * x - y * y * y) * (y * y + 2) * (y * y + 2) / (x - y * y);
-      ASSERT_EQ(ComputeFn(x, y), res);
+      ASSERT_EQ(ComputeFn(x, y), res) << x << ' ' << y;
     }
   }
 }
