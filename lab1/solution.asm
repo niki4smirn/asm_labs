@@ -84,5 +84,22 @@ ComputeFn:          ; x in rdi, y in rsi
 Clock:              ; YOUR_CODE_HERE
                     ret
 
-Polynom:            ; YOUR_CODE_HERE
+Polynom:            ; x in rdi
+                    mov rax, rdi
+                    mov rcx, 2
+                    mul rcx
+                    sub rax, 3
+                    ; (2x - 3) in rax
+
+                    mul rdi
+                    add rax, 4
+                    ; (2x^2 - 3x + 4) in rax
+
+                    mul rdi
+                    sub rax, 5
+                    ; (2x^3 - 3x^2 + 4x - 5) in rax
+
+                    mul rdi
+                    add rax, 6
+                    ; (2x^4 - 3x^3 + 4x^2 - 5x + 6) in rax
                     ret

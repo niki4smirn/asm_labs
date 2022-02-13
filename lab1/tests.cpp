@@ -4,7 +4,7 @@ extern "C" int64_t Sum(int32_t x, uint8_t y);
 extern "C" bool CheckOverflow(int64_t x, int64_t y);
 extern "C" int64_t ComputeFn(int64_t x, int64_t y);
 extern "C" int64_t Clock(int32_t h, int32_t m, int32_t f);
-extern "C" int64_t Polynom(int32_t x);
+extern "C" uint64_t Polynom(int64_t x);
 
 // ---------------------------------------------------------
 
@@ -143,7 +143,8 @@ void ComputeFnGeneratorTest(
     int64_t x = gen_x.GetValue();
     int64_t y = gen_y.GetValue();
     if (x - y * y != 0) {
-      int64_t res = (2 + x * x - y * y * y) * (y * y + 2) * (y * y + 2) / (x - y * y);
+      int64_t res =
+          (2 + x * x - y * y * y) * (y * y + 2) * (y * y + 2) / (x - y * y);
       ASSERT_EQ(ComputeFn(x, y), res) << x << ' ' << y;
     }
   }
@@ -164,4 +165,41 @@ TEST(ComputeFn, Generator) {
       -450,
       450);
 }
+// ---------------------------------------------------------
+
+uint64_t RightPolynom(int32_t x) {
+  uint64_t x64 = x;
+  return (((2 * x64 - 3) * x64 + 4) * x64 - 5) * x64 + 6;
+}
+
+TEST(Polynom, Simple) {
+  EXPECT_EQ(Polynom(0), 6);
+  EXPECT_EQ(Polynom(1), 4);
+  EXPECT_EQ(Polynom(-1), RightPolynom(-1));
+}
+
+void PolynomGeneratorTest(
+    int64_t min_val_x,
+    int64_t max_val_x) {
+  RandomGenerator gen(min_val_x, max_val_x);
+  const int kTestsCount = 1e7;
+  for (int _ = 0; _ < kTestsCount; ++_) {
+    int64_t x = gen.GetValue();
+    ASSERT_EQ(Polynom(x), RightPolynom(x)) << x;
+  }
+}
+
+TEST(Polynom, SmallGenerator) {
+  PolynomGeneratorTest(-10, 10);
+}
+
+TEST(Polynom, Generator100) {
+  PolynomGeneratorTest(-100, 100);
+}
+
+TEST(Polynom, Generator32) {
+  PolynomGeneratorTest(std::numeric_limits<int32_t>::min(),
+                       std::numeric_limits<int32_t>::max());
+}
+
 // ---------------------------------------------------------
