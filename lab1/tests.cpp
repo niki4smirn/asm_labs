@@ -66,12 +66,12 @@ TEST(Sum, Generator) {
 // ---------------------------------------------------------
 namespace overflow {
 namespace edge {
-const int kX = 55108;
-const int64_t kY = 3037000499;
+const int kFourth = 55108;
+const int64_t kSecond = 3037000499;
 }
 namespace min_over {
-const int kX = edge::kX + 1;
-const int64_t kY = edge::kY + 1;
+const int kFourth = edge::kFourth + 1;
+const int64_t kSecond = edge::kSecond + 1;
 }
 }
 
@@ -80,10 +80,10 @@ bool IsInBounds(int64_t value, int64_t left_bound, int64_t right_bound) {
 }
 
 TEST(CheckOverflow, XFourthPower) {
-  EXPECT_EQ(CheckOverflow(overflow::edge::kX, 0), 0);
-  EXPECT_EQ(CheckOverflow(overflow::min_over::kX, 0), 1);
-  EXPECT_EQ(CheckOverflow(-overflow::edge::kX, 0), 0);
-  EXPECT_EQ(CheckOverflow(-overflow::min_over::kX, 0), 1);
+  EXPECT_EQ(CheckOverflow(overflow::edge::kFourth, 0), 0);
+  EXPECT_EQ(CheckOverflow(overflow::min_over::kFourth, 0), 1);
+  EXPECT_EQ(CheckOverflow(-overflow::edge::kFourth, 0), 0);
+  EXPECT_EQ(CheckOverflow(-overflow::min_over::kFourth, 0), 1);
   EXPECT_EQ(CheckOverflow(100000, 0), 1);
   EXPECT_EQ(CheckOverflow(std::numeric_limits<int64_t>::min(), 0), 1);
   EXPECT_EQ(CheckOverflow(std::numeric_limits<int64_t>::max(), 0), 1);
@@ -91,35 +91,77 @@ TEST(CheckOverflow, XFourthPower) {
 
 TEST(CheckOverflow, YSecondPower) {
 
-  EXPECT_EQ(CheckOverflow(0, overflow::edge::kY), 0);
-  EXPECT_EQ(CheckOverflow(0, overflow::min_over::kY), 1);
-  EXPECT_EQ(CheckOverflow(0, -overflow::edge::kY), 0);
-  EXPECT_EQ(CheckOverflow(0, -overflow::min_over::kY), 1);
+  EXPECT_EQ(CheckOverflow(0, overflow::edge::kSecond), 0);
+  EXPECT_EQ(CheckOverflow(0, overflow::min_over::kSecond), 1);
+  EXPECT_EQ(CheckOverflow(0, -overflow::edge::kSecond), 0);
+  EXPECT_EQ(CheckOverflow(0, -overflow::min_over::kSecond), 1);
   EXPECT_EQ(CheckOverflow(0, std::numeric_limits<int64_t>::min()), 1);
   EXPECT_EQ(CheckOverflow(0, std::numeric_limits<int64_t>::max()), 1);
 }
 
-void OverflowGeneratorTest(RandomGenerator gen) {
+void OverflowGeneratorTest(int32_t min_val, int32_t max_val) {
+  RandomGenerator gen(min_val, max_val);
   const int kTestsCount = 1e7;
   for (int _ = 0; _ < kTestsCount; ++_) {
     int64_t x = gen.GetValue();
     int64_t y = gen.GetValue();
     bool ans = false;
-    ans |= !IsInBounds(x, -overflow::edge::kX, overflow::edge::kX);
-    ans |= !IsInBounds(y, -overflow::edge::kY, overflow::edge::kY);
+    ans |= !IsInBounds(x, -overflow::edge::kFourth, overflow::edge::kFourth);
+    ans |= !IsInBounds(y, -overflow::edge::kSecond, overflow::edge::kSecond);
     ASSERT_EQ(CheckOverflow(x, y), ans);
   }
 }
 
-TEST(CheckOverflow, Generator) {
+TEST(CheckOverflow, SmallGenerator) {
   const int kAbsLimit = 2e5;
-  OverflowGeneratorTest(RandomGenerator(-kAbsLimit, kAbsLimit));
+  OverflowGeneratorTest(-kAbsLimit, kAbsLimit);
 
 }
 
 TEST(CheckOverflow, Generator32) {
-  OverflowGeneratorTest(RandomGenerator(std::numeric_limits<int32_t>::min(),
-                                        std::numeric_limits<int32_t>::max()));
+  OverflowGeneratorTest(std::numeric_limits<int32_t>::min(),
+                        std::numeric_limits<int32_t>::max());
 }
 
+// ---------------------------------------------------------
+
+TEST(ComputeFn, Simple) {
+  EXPECT_EQ(ComputeFn(2, 1), 45);
+  EXPECT_EQ(ComputeFn(0, 1), -9);
+  EXPECT_EQ(ComputeFn(10, 5), 1117);
+}
+
+void ComputeFnGeneratorTest(
+    int64_t min_val_x,
+    int64_t max_val_x,
+    int64_t min_val_y,
+    int64_t max_val_y) {
+  RandomGenerator gen_x(min_val_x, max_val_x);
+  RandomGenerator gen_y(min_val_y, max_val_y);
+  const int kTestsCount = 1e7;
+  for (int _ = 0; _ < kTestsCount; ++_) {
+    int64_t x = gen_x.GetValue();
+    int64_t y = gen_y.GetValue();
+    if (x - y * y != 0) {
+      int64_t res = (2 + x * x - y * y * y) * (y * y + 2) * (y * y + 2) / (x - y * y);
+      ASSERT_EQ(ComputeFn(x, y), res);
+    }
+  }
+}
+
+TEST(ComputeFn, SmallGenerator) {
+  ComputeFnGeneratorTest(-10, 10, -10, 10);
+}
+
+TEST(ComputeFn, Generator100) {
+  ComputeFnGeneratorTest(-100, 100, -100, 100);
+}
+
+TEST(ComputeFn, Generator) {
+  ComputeFnGeneratorTest(
+      -10000,
+      10000,
+      -450,
+      450);
+}
 // ---------------------------------------------------------
