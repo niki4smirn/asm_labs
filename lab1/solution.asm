@@ -57,12 +57,9 @@ ComputeFn:          ; x in rdi, y in rsi
 
                     mov rax, rcx
                     imul rsi
-                    mov r9, 0xFFFFFFFFFFFFFFFF
-                    xor rax, r9
-                    add rax, 1
-                    ; -y^3 in rax
+                    ; y^3 in rax
 
-                    add r8, rax
+                    sub r8, rax
                     add r8, 2
                     ; (2 + x^3 - y^3) in r8
 
@@ -84,7 +81,8 @@ ComputeFn:          ; x in rdi, y in rsi
 Clock:              ; YOUR_CODE_HERE
                     ret
 
-Polynom:            ; x in rdi
+Polynom:            ; x in edi
+                    movsx rdi, edi
                     mov rax, rdi
                     mov rcx, 2
                     mul rcx
