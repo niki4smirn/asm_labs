@@ -1,9 +1,20 @@
 #include "gtest/gtest.h"
 
+#include <cmath>
+
 extern "C" int64_t Sum(int32_t x, uint8_t y);
 extern "C" bool CheckOverflow(int64_t x, int64_t y);
 extern "C" int64_t ComputeFn(int64_t x, int64_t y);
 extern "C" int64_t Clock(int32_t h, int32_t m, int32_t f);
+// int64_t Clock(int32_t h, int32_t m, int32_t f) {
+//   f *= 120;
+//   int64_t deg = 3600 * h - 660 * m;
+//   int64_t dist = f + deg;
+//   dist += 43200;
+//   dist %= 43200;
+//   dist /= 11;
+//   return dist;
+// }
 extern "C" uint64_t Polynom(int32_t x);
 
 // ---------------------------------------------------------
@@ -200,6 +211,33 @@ TEST(Polynom, Generator100) {
 TEST(Polynom, Generator32) {
   PolynomGeneratorTest(std::numeric_limits<int32_t>::min(),
                        std::numeric_limits<int32_t>::max());
+}
+
+// ---------------------------------------------------------
+
+bool CheckClock(float h, float m, float need) {
+  float ans = Clock(h, m, need);
+  float ans_copy = ans;
+  m += ans / 60;
+  while (m >= 60) {
+    m -= 60;
+    ++h;
+  }
+  float deg = 5.5f * m - 30 * h;
+  while (deg < 0) {
+    deg += 360;
+  }
+  return std::fabs(deg - need) < 0.5 || std::fabs(deg - need - 360) < 0.5;
+}
+
+TEST(Clock, Generator) {
+  for (int h = 0; h < 12; ++h) {
+    for (int m = 0; m < 60; ++m) {
+      for (int deg = 0; deg < 360; ++deg) {
+        ASSERT_TRUE(CheckClock(h, m, deg)) << h << ' ' << m << ' ' << deg;
+      }
+    }
+  }
 }
 
 // ---------------------------------------------------------

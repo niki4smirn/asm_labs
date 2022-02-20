@@ -78,7 +78,41 @@ ComputeFn:          ; x in rdi, y in rsi
                     idiv rdi
                     ret
 
-Clock:              ; YOUR_CODE_HERE
+Clock:
+                    ; h in edi
+                    ; m in esi
+                    ; f in edx
+                    mov eax, edx
+                    mov r8d, 120
+                    mul r8d
+                    mov r9d, eax
+                    ; f * 120 in r9d
+
+                    mov eax, esi
+                    mov r8d, 660
+                    mul r8d
+                    mov esi, eax
+                    ; m * 660 in esi
+
+                    mov eax, edi
+                    mov r8d, 3600
+                    mul r8d
+                    ; h * 3600 in eax
+
+                    sub eax, esi
+                    ; deg in eax
+
+                    add eax, r9d
+                    ; dist in eax
+
+                    add eax, 43200
+                    xor edx, edx
+                    mov r8d, 43200
+                    div r8d
+                    mov eax, edx
+                    xor edx, edx
+                    mov r8d, 11
+                    div r8d
                     ret
 
 Polynom:            ; x in edi
