@@ -24,7 +24,29 @@ CheckOverflow:      mov r8, 0
                     imul rdi
                     seto cl
                     or r8, rcx
+                    mov r9, rax
+                    ; x^2 in r9
 
+                    mov rax, rsi
+                    imul rdi
+                    add rax, rax
+                    ; 2xy in rax
+
+                    mov r10, rax
+                    add r10, r9
+                    ; x^2 + 2xy in r10
+
+                    mov rax, rsi
+                    ; y^2
+                    imul rsi
+                    seto cl
+                    or r8, rcx
+
+                    add rax, r10
+                    seto cl
+                    or r8, rcx
+
+                    mov rax, r9
                     ; x^3
                     imul rdi
                     seto cl
@@ -32,12 +54,6 @@ CheckOverflow:      mov r8, 0
 
                     ; x^4
                     imul rdi
-                    seto cl
-                    or r8, rcx
-
-                    mov rax, rsi
-                    ; y^2
-                    imul rsi
                     seto cl
                     or r8, rcx
 

@@ -101,7 +101,6 @@ TEST(CheckOverflow, XFourthPower) {
 }
 
 TEST(CheckOverflow, YSecondPower) {
-
   EXPECT_EQ(CheckOverflow(0, overflow::edge::kSecond), 0);
   EXPECT_EQ(CheckOverflow(0, overflow::min_over::kSecond), 1);
   EXPECT_EQ(CheckOverflow(0, -overflow::edge::kSecond), 0);
@@ -110,7 +109,12 @@ TEST(CheckOverflow, YSecondPower) {
   EXPECT_EQ(CheckOverflow(0, std::numeric_limits<int64_t>::max()), 1);
 }
 
-void OverflowGeneratorTest(int32_t min_val, int32_t max_val) {
+TEST(CheckOverflow, SquareExpression) {
+  ASSERT_EQ(CheckOverflow(overflow::edge::kFourth,
+                          overflow::edge::kSecond), 1);
+}
+
+void OverflowGeneratorTest(int64_t min_val, int64_t max_val) {
   RandomGenerator gen(min_val, max_val);
   const int kTestsCount = 1e7;
   for (int _ = 0; _ < kTestsCount; ++_) {
@@ -119,7 +123,9 @@ void OverflowGeneratorTest(int32_t min_val, int32_t max_val) {
     bool ans = false;
     ans |= !IsInBounds(x, -overflow::edge::kFourth, overflow::edge::kFourth);
     ans |= !IsInBounds(y, -overflow::edge::kSecond, overflow::edge::kSecond);
-    ASSERT_EQ(CheckOverflow(x, y), ans) << x << ' ' << y;
+    if (!ans) {
+      ASSERT_FALSE(CheckOverflow(x, y))  << x << ' ' << y;
+    }
   }
 }
 
@@ -132,6 +138,11 @@ TEST(CheckOverflow, SmallGenerator) {
 TEST(CheckOverflow, Generator32) {
   OverflowGeneratorTest(std::numeric_limits<int32_t>::min(),
                         std::numeric_limits<int32_t>::max());
+}
+
+TEST(CheckOverflow, Generator64) {
+  OverflowGeneratorTest(std::numeric_limits<int64_t>::min(),
+                        std::numeric_limits<int64_t>::max());
 }
 
 // ---------------------------------------------------------
