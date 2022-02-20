@@ -77,10 +77,9 @@ ComputeFn:          ; x in rdi, y in rsi
 
                     sub r8, rax
                     add r8, 2
-                    ; (2 + x^3 - y^3) in r8
+                    ; (2 + x^2 - y^3) in r8
 
-                    mov rax, rsi
-                    imul rsi
+                    mov rax, rcx
                     add rax, 2
                     imul rax
                     ; (y^2 + 2)^2 in rax
@@ -90,6 +89,8 @@ ComputeFn:          ; x in rdi, y in rsi
 
                     sub rdi, rcx
                     ; x-y^2 in rdi
+
+                    cqo
 
                     idiv rdi
                     ret
