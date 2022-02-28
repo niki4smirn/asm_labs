@@ -167,3 +167,42 @@ TEST(Function, Generator) {
 }
 
 // ---------------------------------------------------------
+
+TEST(IsInCircle, Simple) {
+  ASSERT_EQ(IsInCircle(0, 0, 1), true);
+  ASSERT_EQ(IsInCircle(1, 0, 1), true);
+  ASSERT_EQ(IsInCircle(0, 1, 1), true);
+  ASSERT_EQ(IsInCircle(1, 1, 1), false);
+  ASSERT_EQ(IsInCircle(1, 1, 2), true);
+  ASSERT_EQ(IsInCircle(1000000000, 1000000000, 100000000000ll), true);
+}
+
+void GeneratorTest(int64_t min_value, int64_t max_value) {
+  RandomGenerator gen(min_value, max_value);
+  const int kTestsCount = 1e7;
+  for (int _ = 0; _ < kTestsCount; ++_) {
+    int64_t x = gen.GetValue();
+    int64_t y = gen.GetValue();
+    if (x > (1 << 30) || y > (1 << 30)) {
+      continue;
+    }
+    int64_t d = std::abs(gen.GetValue());
+    bool res = false;
+    res |= (d >= (1 << 30));
+    res |= (x * x + y * y <= d * d);
+
+    ASSERT_EQ(IsInCircle(x, y, d), res) << x << ' ' << y << ' ' << d;
+  }
+}
+
+TEST(IsInCircle, Generator32) {
+  GeneratorTest(std::numeric_limits<int32_t>::min(),
+                std::numeric_limits<int32_t>::max());
+}
+
+TEST(IsInCircle, Generator64) {
+  GeneratorTest(std::numeric_limits<int64_t>::min(),
+                std::numeric_limits<int64_t>::max());
+}
+
+// ---------------------------------------------------------

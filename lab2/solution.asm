@@ -149,7 +149,24 @@ Function:           ; x in rdi
 .return:
                     ret
 
-IsInCircle:         ; YOUR_CODE_HERE
+IsInCircle:         ; x in rdi, y in rsi, d in rdx
+                    xor rax, rax
+                    cmp rdx, 0x40000000
+                    jge .inside
+
+                    imul rdi, rdi
+                    imul rsi, rsi
+                    add rdi, rsi
+
+                    imul rdx, rdx
+
+                    cmp rdi, rdx
+                    jle .inside
+
+                    jmp .return
+.inside:
+                    mov rax, 1
+.return:
                     ret
 
 TwoIntegers:        ; YOUR_CODE_HERE
