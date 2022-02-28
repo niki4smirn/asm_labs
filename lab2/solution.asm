@@ -169,7 +169,26 @@ IsInCircle:         ; x in rdi, y in rsi, d in rdx
 .return:
                     ret
 
-TwoIntegers:        ; YOUR_CODE_HERE
+TwoIntegers:        ; x in rdi, y in rsi
+                    xor rdx, rdx
+                    mov rax, rdi
+                    div rsi
+
+                    cmp rdx, 0
+                    je .success
+
+                    xor rdx, rdx
+                    mov rax, rsi
+                    div rdi
+
+                    cmp rdx, 0
+                    je .success
+
+                    xor rax, rax
+                    jmp .return
+.success:
+                    mov rax, 1
+.return:
                     ret
 
 CountNumbers:       ; YOUR_CODE_HERE

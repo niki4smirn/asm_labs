@@ -206,3 +206,30 @@ TEST(IsInCircle, Generator64) {
 }
 
 // ---------------------------------------------------------
+
+TEST(TwoIntegers, Simple) {
+  ASSERT_EQ(TwoIntegers(1, 2), true);
+  ASSERT_EQ(TwoIntegers(2, 1), true);
+  ASSERT_EQ(TwoIntegers(1, 100), true);
+  ASSERT_EQ(TwoIntegers(100, 1), true);
+  ASSERT_EQ(TwoIntegers(1, 1), true);
+  ASSERT_EQ(TwoIntegers(3, 2), false);
+  ASSERT_EQ(TwoIntegers(27, 9), true);
+}
+
+TEST(TwoIntegers, Generator) {
+  RandomGenerator gen(std::numeric_limits<int64_t>::min(),
+                      std::numeric_limits<int64_t>::max());
+  const int kTestsCount = 1e7;
+  for (int _ = 0; _ < kTestsCount; ++_) {
+    int64_t x = gen.GetValue();
+    int64_t y = gen.GetValue();
+    if (x % y == 0 || y % x == 0) {
+      ASSERT_TRUE(TwoIntegers(x, y)) << x << ' ' << y;
+    } else {
+      ASSERT_FALSE(TwoIntegers(x, y)) << x << ' ' << y;
+    }
+  }
+}
+
+// ---------------------------------------------------------
