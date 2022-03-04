@@ -233,3 +233,98 @@ TEST(TwoIntegers, Generator) {
 }
 
 // ---------------------------------------------------------
+
+TEST(CountNumbers, Simple) {
+  ASSERT_EQ(CountNumbers(1, 2, 3), 0);
+  ASSERT_EQ(CountNumbers(2, 4, 3), 1);
+  ASSERT_EQ(CountNumbers(3, 4, 7), 2);
+}
+
+TEST(CountNumbers, Generator) {
+  RandomGenerator gen(1,
+                      std::numeric_limits<int64_t>::max());
+  const int kTestsCount = 1e7;
+  for (int _ = 0; _ < kTestsCount; ++_) {
+    int64_t a = gen.GetValue();
+    int64_t b = gen.GetValue();
+    int64_t c = gen.GetValue();
+    int64_t min = std::min(std::min(a, b), c);
+    int8_t ans = 0;
+    if (a % min % 2 == 1) {
+      ++ans;
+    }
+    if (b % min % 2 == 1) {
+      ++ans;
+    }
+    if (c % min % 2 == 1) {
+      ++ans;
+    }
+    ASSERT_EQ(CountNumbers(a, b, c), ans) << a << ' ' << b << ' ' << c;
+  }
+}
+
+// ---------------------------------------------------------
+
+namespace switch_responses {
+const char* first = "That's bad";
+const char* second = "No comments.";
+const char* third = "Not bad...";
+const char* fourth = "Nice :)";
+const char* fifth = "Perfecto!!!";
+const char* sixth = "Ooops";
+}
+
+TEST(Switch, Simple) {
+  ASSERT_STREQ(Switch(0), switch_responses::first);
+  ASSERT_STREQ(Switch(4), switch_responses::second);
+  ASSERT_STREQ(Switch(13), switch_responses::third);
+  ASSERT_STREQ(Switch(-99), switch_responses::fourth);
+  ASSERT_STREQ(Switch(10), switch_responses::fifth);
+  ASSERT_STREQ(Switch(3), switch_responses::sixth);
+}
+
+TEST(Switch, Generator) {
+  const int kAbsLimit = 2000;
+  RandomGenerator gen(-kAbsLimit, kAbsLimit);
+  const int kTestsCount = 1e7;
+  for (int _ = 0; _ < kTestsCount; ++_) {
+    int64_t k = gen.GetValue();
+    const char* ans;
+    switch (k) {
+      case 0:
+      case 1:
+      case 2:
+      case 5: {
+        ans = switch_responses::first;
+        break;
+      }
+      case 4:
+      case 42:
+      case 43: {
+        ans = switch_responses::second;
+        break;
+      }
+      case 13: {
+        ans = switch_responses::third;
+        break;
+      }
+      case -99:
+      case -100: {
+        ans = switch_responses::fourth;
+        break;
+      }
+      case 10:
+      case 100:
+      case 1000: {
+        ans = switch_responses::fifth;
+        break;
+      }
+      default: {
+        ans = switch_responses::sixth;
+      }
+    }
+    ASSERT_STREQ(Switch(k), ans) << k;
+  }
+}
+
+// ---------------------------------------------------------

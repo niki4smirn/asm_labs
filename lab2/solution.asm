@@ -13,6 +13,18 @@ positive_number_response:
                     db 'Yeah) It', 39, 's positive :D', 0
 negative_number_response:
                     db 'Ohh.. so much negative :(', 0
+switch_first_response:
+                    db 'That', 39, 's bad', 0
+switch_second_response:
+                    db 'No comments.', 0
+switch_third_response:
+                    db 'Not bad...', 0
+switch_fourth_response:
+                    db 'Nice :)', 0
+switch_fifth_response:
+                    db 'Perfecto!!!', 0
+switch_sixth_response:
+                    db 'Ooops', 0
 
                     section .text
 
@@ -191,10 +203,107 @@ TwoIntegers:        ; x in rdi, y in rsi
 .return:
                     ret
 
-CountNumbers:       ; YOUR_CODE_HERE
+CountNumbers:       ; a in rdi, b in rsi, c in rdx
+                    mov r8, rdx
+                    xor rdx, rdx
+                    ; c in r8
+                    mov r9, rdi
+                    cmp rsi, r9
+                    jl .mov_from_rsi_to_r9
+                    jmp .after_rsi_mov
+.mov_from_rsi_to_r9:
+                    mov r9, rsi
+.after_rsi_mov:
+                    cmp r8, r9
+                    jl .mov_from_r8_to_r9
+                    jmp .after_r8_mov
+.mov_from_r8_to_r9:
+                    mov r9, r8
+.after_r8_mov:
+                    ; min in r9
+                    xor r10, r10
+                    ; ans in r10
+
+                    mov rax, rdi
+                    idiv r9
+
+                    mov r11, 1
+                    and r11, rdx
+                    add r10, r11
+                    xor rdx, rdx
+
+                    mov rax, rsi
+                    idiv r9
+
+                    mov r11, 1
+                    and r11, rdx
+                    add r10, r11
+                    xor rdx, rdx
+
+                    mov rax, r8
+                    idiv r9
+
+                    mov r11, 1
+                    and r11, rdx
+                    add r10, r11
+                    xor rdx, rdx
+
+                    mov rax, r10
                     ret
 
-Switch:             ; YOUR_CODE_HERE
+Switch:             ; k in rdi
+                    cmp rdi, 0
+                    je .first
+                    cmp rdi, 1
+                    je .first
+                    cmp rdi, 2
+                    je .first
+                    cmp rdi, 5
+                    je .first
+
+                    cmp rdi, 4
+                    je .second
+                    cmp rdi, 42
+                    je .second
+                    cmp rdi, 43
+                    je .second
+
+                    cmp rdi, 13
+                    je .third
+
+                    cmp rdi, -99
+                    je .fourth
+                    cmp rdi, -100
+                    je .fourth
+
+                    cmp rdi, 10
+                    je .fifth
+                    cmp rdi, 100
+                    je .fifth
+                    cmp rdi, 1000
+                    je .fifth
+
+                    jmp .sixth
+
+.first:
+                    mov rax, switch_first_response
+                    jmp .return
+.second:
+                    mov rax, switch_second_response
+                    jmp .return
+.third:
+                    mov rax, switch_third_response
+                    jmp .return
+.fourth:
+                    mov rax, switch_fourth_response
+                    jmp .return
+.fifth:
+                    mov rax, switch_fifth_response
+                    jmp .return
+.sixth:
+                    mov rax, switch_sixth_response
+                    jmp .return
+.return:
                     ret
 
 MagicMetric:        ; YOUR_CODE_HERE
