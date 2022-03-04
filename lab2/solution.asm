@@ -306,5 +306,136 @@ Switch:             ; k in rdi
 .return:
                     ret
 
-MagicMetric:        ; YOUR_CODE_HERE
+MagicMetric:        ; x in rdi
+                    xor rax, rax
+                    cmp rdi, 10000000
+                    jl .return
+                    cmp rdi, 99999999
+                    jg .return
+
+                    xor r8, r8
+                    ; ans in r8
+
+                    mov rax, rdi
+                    mov r10, 10
+
+                    xor rdx, rdx
+                    idiv r10
+                    cmp rdx, 2
+                    je .first_ok
+
+                    xor rdx, rdx
+                    idiv r10
+                    cmp rdx, 2
+                    je .first_ok
+
+                    xor rdx, rdx
+                    idiv r10
+                    cmp rdx, 2
+                    je .first_ok
+
+                    xor rdx, rdx
+                    idiv r10
+                    cmp rdx, 2
+                    je .first_ok
+
+                    jmp .second
+.first_ok:
+                    inc r8
+.second:
+                    mov rax, rdi
+                    mov r10, 10000
+                    xor rdx, rdx
+                    idiv r10
+
+                    xor r9, r9
+                    ; sum in r9
+
+                    mov r10, 10
+
+                    xor rdx, rdx
+                    idiv r10
+                    add r9, rdx
+
+                    xor rdx, rdx
+                    idiv r10
+                    add r9, rdx
+
+                    xor rdx, rdx
+                    idiv r10
+                    add r9, rdx
+
+                    cmp r9, 5
+                    jle .third
+
+                    inc r8
+.third:
+                    mov rax, rdi
+                    mov r10, 10
+                    xor rdx, rdx
+                    idiv r10
+                    xor rdx, rdx
+                    idiv r10
+
+                    mov r9, rdx
+                    ; second in r9
+
+                    xor rdx, rdx
+
+                    mov r10, 100000
+                    idiv r10
+                    xor rdx, rdx
+                    mov r10, 10
+                    idiv r10
+
+                    ; sixth in rdx
+
+                    cmp rdx, r9
+                    jne .fourth
+
+                    inc r8
+.fourth:
+                    mov rax, rdi
+                    mov r10, 10
+
+                    xor rdx, rdx
+                    idiv r10
+                    mov rcx, rdx
+
+                    xor rdx, rdx
+                    idiv r10
+                    mov r9, rdx
+
+                    xor rdx, rdx
+                    idiv r10
+                    mov r11, rdx
+
+                    xor rdx, rdx
+                    idiv r10
+                    mov r12, rdx
+
+                    xor rdx, rdx
+                    idiv r10
+                    cmp rdx, r12
+                    jne .after_fourth
+
+                    xor rdx, rdx
+                    idiv r10
+                    cmp rdx, r11
+                    jne .after_fourth
+
+                    xor rdx, rdx
+                    idiv r10
+                    cmp rdx, r9
+                    jne .after_fourth
+
+                    xor rdx, rdx
+                    idiv r10
+                    cmp rdx, rcx
+                    jne .after_fourth
+
+                    inc r8
+.after_fourth:
+                    mov rax, r8
+.return:
                     ret

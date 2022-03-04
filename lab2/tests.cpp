@@ -11,6 +11,7 @@ extern "C" int8_t MagicMetric(int64_t x);
 
 // ---------------------------------------------------------
 
+#include <algorithm>
 #include <random>
 
 class RandomGenerator {
@@ -324,6 +325,55 @@ TEST(Switch, Generator) {
       }
     }
     ASSERT_STREQ(Switch(k), ans) << k;
+  }
+}
+
+// ---------------------------------------------------------
+
+TEST(MagicMetric, Simple) {
+  ASSERT_EQ(MagicMetric(1), 0);
+  ASSERT_EQ(MagicMetric(111111111), 0);
+  ASSERT_EQ(MagicMetric(11111111), 2);
+}
+
+int GetNumberDigit(int64_t number, int digit_pos) {
+  while (digit_pos--) {
+    number /= 10;
+  }
+  return number % 10;
+}
+
+bool IsPalindrome(int64_t k) {
+  std::string k_str = std::to_string(k);
+  std::reverse(k_str.begin(), k_str.end());
+  return k_str == std::to_string(k);
+}
+
+TEST(MagicMetric, Generator) {
+  RandomGenerator gen(std::numeric_limits<int64_t>::min(),
+                      std::numeric_limits<int64_t>::max());
+  const int kTestsCount = 1e7;
+  for (int _ = 0; _ < kTestsCount; ++_) {
+    int64_t k = gen.GetValue();
+    int8_t ans = 0;
+    if (10000000 <= k && k <= 99999999) {
+      if (GetNumberDigit(k, 0) == 2 ||
+          GetNumberDigit(k, 1) == 2 ||
+          GetNumberDigit(k, 2) == 2 ||
+          GetNumberDigit(k, 3) == 2) {
+        ++ans;
+      }
+      if (GetNumberDigit(k, 4) + GetNumberDigit(k, 6) > 5) {
+        ++ans;
+      }
+      if (GetNumberDigit(k, 1) == GetNumberDigit(k, 5)) {
+        ++ans;
+      }
+      if (IsPalindrome(k)) {
+        ++ans;
+      }
+    }
+    ASSERT_EQ(MagicMetric(k), ans);
   }
 }
 
