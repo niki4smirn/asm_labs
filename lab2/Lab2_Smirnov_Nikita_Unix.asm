@@ -163,19 +163,21 @@ Function:           ; x in rdi
 
 IsInCircle:         ; x in rdi, y in rsi, d in rdx
                     xor rax, rax
-                    cmp rdx, 0x40000000
+                    mov r8, 0x80000000
+                    cmp rdx, r8
                     jge .inside
 
                     imul rdi, rdi
                     imul rsi, rsi
                     add rdi, rsi
 
+                    mov r10, 4
+                    imul rdi, r10
+
                     imul rdx, rdx
 
                     cmp rdi, rdx
-                    jle .inside
-
-                    jmp .return
+                    jg .return
 .inside:
                     mov rax, 1
 .return:

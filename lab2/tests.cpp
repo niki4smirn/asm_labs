@@ -171,10 +171,14 @@ TEST(Function, Generator) {
 
 TEST(IsInCircle, Simple) {
   ASSERT_EQ(IsInCircle(0, 0, 1), true);
-  ASSERT_EQ(IsInCircle(1, 0, 1), true);
-  ASSERT_EQ(IsInCircle(0, 1, 1), true);
+  ASSERT_EQ(IsInCircle(1, 0, 1), false);
+  ASSERT_EQ(IsInCircle(0, 1, 1), false);
   ASSERT_EQ(IsInCircle(1, 1, 1), false);
-  ASSERT_EQ(IsInCircle(1, 1, 2), true);
+  ASSERT_EQ(IsInCircle(0, 0, 2), true);
+  ASSERT_EQ(IsInCircle(1, 0, 2), true);
+  ASSERT_EQ(IsInCircle(0, 1, 2), true);
+  ASSERT_EQ(IsInCircle(1, 1, 2), false);
+  ASSERT_EQ(IsInCircle(1, 1, 3), true);
   ASSERT_EQ(IsInCircle(1000000000, 1000000000, 100000000000ll), true);
 }
 
@@ -187,13 +191,20 @@ void GeneratorTest(int64_t min_value, int64_t max_value) {
     if (x > (1 << 30) || y > (1 << 30)) {
       continue;
     }
+    if (x * x + y * y > (1LL << 60)) {
+      continue;
+    }
     int64_t d = std::abs(gen.GetValue());
     bool res = false;
-    res |= (d >= (1 << 30));
-    res |= (x * x + y * y <= d * d);
+    res |= (d >= (1LL << 31));
+    res |= (4 * (x * x + y * y) <= d * d);
 
     ASSERT_EQ(IsInCircle(x, y, d), res) << x << ' ' << y << ' ' << d;
   }
+}
+
+TEST(IsInCircle, GeneratorSmall) {
+  GeneratorTest(-10, 10);
 }
 
 TEST(IsInCircle, Generator32) {
