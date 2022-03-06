@@ -131,17 +131,13 @@ Function:           ; x in rdi
                     idiv r8
 
                     cmp rdx, 0
-                    je .after_change
+                    je .after_add
                     cmp rax, 0
-                    jle .sub
-                    jmp .add
-
-.sub:
-                    dec rax
-                    jmp .after_change
+                    jg .add
+                    jmp .after_add
 .add:
                     inc rax
-.after_change:
+.after_add:
                     jmp .return
 .third_branch:
                     mov rax, rdi

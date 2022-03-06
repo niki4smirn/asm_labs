@@ -150,11 +150,7 @@ int64_t RightFunction(int64_t x) {
     res = 2 * x * x - 3;
   } else if (x <= 17) {
     double val = (36 - x * x) * 1.0 / (10 - 3 * x);
-    if (val < 0) {
-      res = std::floor(val);
-    } else {
-      res = std::ceil(val);
-    }
+    res = std::ceil(val);
   } else {
     res = - x * x * x - 2;
   }
@@ -354,6 +350,8 @@ TEST(Switch, Generator) {
 
 TEST(MagicMetric, Simple) {
   ASSERT_EQ(MagicMetric(1), 0);
+  ASSERT_EQ(MagicMetric(6), 0);
+  ASSERT_EQ(MagicMetric(10000001), 2);
   ASSERT_EQ(MagicMetric(111111111), 0);
   ASSERT_EQ(MagicMetric(11111111), 2);
 }
@@ -371,60 +369,44 @@ bool IsPalindrome(int64_t k) {
   return k_str == std::to_string(k);
 }
 
-TEST(MagicMetric, Generator8digit) {
-  RandomGenerator gen(10000000,
-                      99999999);
+int8_t RightMagicMetric(int64_t k) {
+  int8_t ans = 0;
+  if (10000000 <= k && k <= 99999999) {
+    if (GetNumberDigit(k, 0) == 2 ||
+        GetNumberDigit(k, 1) == 2 ||
+        GetNumberDigit(k, 2) == 2 ||
+        GetNumberDigit(k, 3) == 2) {
+      ++ans;
+    }
+    if (GetNumberDigit(k, 5) + GetNumberDigit(k, 7) > 5) {
+      ++ans;
+    }
+    if (GetNumberDigit(k, 2) == GetNumberDigit(k, 6)) {
+      ++ans;
+    }
+    if (IsPalindrome(k)) {
+      ++ans;
+    }
+  }
+  return ans;
+}
+
+void MagicMetricGenerator(int64_t min_value, int64_t max_value) {
+  RandomGenerator gen(min_value, max_value);
   const int kTestsCount = 1e7;
   for (int _ = 0; _ < kTestsCount; ++_) {
     int64_t k = gen.GetValue();
-    int8_t ans = 0;
-    if (10000000 <= k && k <= 99999999) {
-      if (GetNumberDigit(k, 0) == 2 ||
-          GetNumberDigit(k, 1) == 2 ||
-          GetNumberDigit(k, 2) == 2 ||
-          GetNumberDigit(k, 3) == 2) {
-        ++ans;
-      }
-      if (GetNumberDigit(k, 5) + GetNumberDigit(k, 7) > 5) {
-        ++ans;
-      }
-      if (GetNumberDigit(k, 2) == GetNumberDigit(k, 6)) {
-        ++ans;
-      }
-      if (IsPalindrome(k)) {
-        ++ans;
-      }
-    }
-    ASSERT_EQ(MagicMetric(k), ans);
+    ASSERT_EQ(MagicMetric(k), RightMagicMetric(k)) << k;
   }
 }
 
+TEST(MagicMetric, Generator8digit) {
+  MagicMetricGenerator(10000000, 99999999);
+}
+
 TEST(MagicMetric, Generator64) {
-  RandomGenerator gen(std::numeric_limits<int64_t>::min(),
-                      std::numeric_limits<int64_t>::max());
-  const int kTestsCount = 1e7;
-  for (int _ = 0; _ < kTestsCount; ++_) {
-    int64_t k = gen.GetValue();
-    int8_t ans = 0;
-    if (10000000 <= k && k <= 99999999) {
-      if (GetNumberDigit(k, 0) == 2 ||
-          GetNumberDigit(k, 1) == 2 ||
-          GetNumberDigit(k, 2) == 2 ||
-          GetNumberDigit(k, 3) == 2) {
-        ++ans;
-      }
-      if (GetNumberDigit(k, 5) + GetNumberDigit(k, 7) > 5) {
-        ++ans;
-      }
-      if (GetNumberDigit(k, 2) == GetNumberDigit(k, 6)) {
-        ++ans;
-      }
-      if (IsPalindrome(k)) {
-        ++ans;
-      }
-    }
-    ASSERT_EQ(MagicMetric(k), ans);
-  }
+  MagicMetricGenerator(std::numeric_limits<int64_t>::min(),
+                       std::numeric_limits<int64_t>::max());
 }
 
 // ---------------------------------------------------------
