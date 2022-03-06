@@ -349,7 +349,35 @@ bool IsPalindrome(int64_t k) {
   return k_str == std::to_string(k);
 }
 
-TEST(MagicMetric, Generator) {
+TEST(MagicMetric, Generator8digit) {
+  RandomGenerator gen(10000000,
+                      99999999);
+  const int kTestsCount = 1e7;
+  for (int _ = 0; _ < kTestsCount; ++_) {
+    int64_t k = gen.GetValue();
+    int8_t ans = 0;
+    if (10000000 <= k && k <= 99999999) {
+      if (GetNumberDigit(k, 0) == 2 ||
+          GetNumberDigit(k, 1) == 2 ||
+          GetNumberDigit(k, 2) == 2 ||
+          GetNumberDigit(k, 3) == 2) {
+        ++ans;
+      }
+      if (GetNumberDigit(k, 5) + GetNumberDigit(k, 7) > 5) {
+        ++ans;
+      }
+      if (GetNumberDigit(k, 2) == GetNumberDigit(k, 6)) {
+        ++ans;
+      }
+      if (IsPalindrome(k)) {
+        ++ans;
+      }
+    }
+    ASSERT_EQ(MagicMetric(k), ans);
+  }
+}
+
+TEST(MagicMetric, Generator64) {
   RandomGenerator gen(std::numeric_limits<int64_t>::min(),
                       std::numeric_limits<int64_t>::max());
   const int kTestsCount = 1e7;
@@ -363,10 +391,10 @@ TEST(MagicMetric, Generator) {
           GetNumberDigit(k, 3) == 2) {
         ++ans;
       }
-      if (GetNumberDigit(k, 4) + GetNumberDigit(k, 6) > 5) {
+      if (GetNumberDigit(k, 5) + GetNumberDigit(k, 7) > 5) {
         ++ans;
       }
-      if (GetNumberDigit(k, 1) == GetNumberDigit(k, 5)) {
+      if (GetNumberDigit(k, 2) == GetNumberDigit(k, 6)) {
         ++ans;
       }
       if (IsPalindrome(k)) {

@@ -344,7 +344,7 @@ MagicMetric:        ; x in rdi
                     inc r8
 .second:
                     mov rax, rdi
-                    mov r10, 10000
+                    mov r10, 100000
                     xor rdx, rdx
                     idiv r10
 
@@ -359,7 +359,6 @@ MagicMetric:        ; x in rdi
 
                     xor rdx, rdx
                     idiv r10
-                    add r9, rdx
 
                     xor rdx, rdx
                     idiv r10
@@ -376,13 +375,15 @@ MagicMetric:        ; x in rdi
                     idiv r10
                     xor rdx, rdx
                     idiv r10
+                    xor rdx, rdx
+                    idiv r10
 
                     mov r9, rdx
                     ; second in r9
 
                     xor rdx, rdx
 
-                    mov r10, 100000
+                    mov r10, 1000
                     idiv r10
                     xor rdx, rdx
                     mov r10, 10
