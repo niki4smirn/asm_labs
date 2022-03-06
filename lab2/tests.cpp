@@ -351,6 +351,7 @@ TEST(Switch, Generator) {
 TEST(MagicMetric, Simple) {
   ASSERT_EQ(MagicMetric(1), 0);
   ASSERT_EQ(MagicMetric(6), 0);
+  ASSERT_EQ(MagicMetric(10000000), 1);
   ASSERT_EQ(MagicMetric(10000001), 2);
   ASSERT_EQ(MagicMetric(111111111), 0);
   ASSERT_EQ(MagicMetric(11111111), 2);
@@ -391,22 +392,20 @@ int8_t RightMagicMetric(int64_t k) {
   return ans;
 }
 
-void MagicMetricGenerator(int64_t min_value, int64_t max_value) {
-  RandomGenerator gen(min_value, max_value);
-  const int kTestsCount = 1e7;
-  for (int _ = 0; _ < kTestsCount; ++_) {
-    int64_t k = gen.GetValue();
+TEST(MagicMetric, All8digit) {
+  for (int k = 10000000; k <= 99999999; ++k) {
     ASSERT_EQ(MagicMetric(k), RightMagicMetric(k)) << k;
   }
 }
 
-TEST(MagicMetric, Generator8digit) {
-  MagicMetricGenerator(10000000, 99999999);
-}
-
 TEST(MagicMetric, Generator64) {
-  MagicMetricGenerator(std::numeric_limits<int64_t>::min(),
-                       std::numeric_limits<int64_t>::max());
+  RandomGenerator gen(std::numeric_limits<int64_t>::min(),
+                      std::numeric_limits<int64_t>::max());
+  const int kTestsCount = 1e7;
+  for (int _ = 0; _ < kTestsCount; ++_) {
+    int64_t k = gen.GetValue();
+    EXPECT_EQ(MagicMetric(k), RightMagicMetric(k)) << k;
+  }
 }
 
 // ---------------------------------------------------------

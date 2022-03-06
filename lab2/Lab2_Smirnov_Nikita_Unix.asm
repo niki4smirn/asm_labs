@@ -299,35 +299,33 @@ Switch:             ; k in rdi
                     ret
 
 MagicMetric:        ; x in rdi
-                    xor rax, rax
+                    xor r8, r8
+                    ; ans in r8
                     cmp rdi, 10000000
                     jl .return
                     cmp rdi, 99999999
                     jg .return
 
-                    xor r8, r8
-                    ; ans in r8
-
+                    ; first check
                     mov rax, rdi
                     mov r10, 10
-
-                    xor rdx, rdx
-                    idiv r10
+                    cqo
+                    div r10
                     cmp rdx, 2
                     je .first_ok
 
-                    xor rdx, rdx
-                    idiv r10
+                    cqo
+                    div r10
                     cmp rdx, 2
                     je .first_ok
 
-                    xor rdx, rdx
-                    idiv r10
+                    cqo
+                    div r10
                     cmp rdx, 2
                     je .first_ok
 
-                    xor rdx, rdx
-                    idiv r10
+                    cqo
+                    div r10
                     cmp rdx, 2
                     je .first_ok
 
@@ -337,25 +335,17 @@ MagicMetric:        ; x in rdi
 .second:
                     mov rax, rdi
                     mov r10, 100000
-                    xor rdx, rdx
-                    idiv r10
-
-                    xor r9, r9
-                    ; sum in r9
-
+                    cqo
+                    div r10
                     mov r10, 10
-
-                    xor rdx, rdx
-                    idiv r10
+                    cqo
+                    div r10
+                    mov r9, rdx
+                    cqo
+                    div r10
+                    cqo
+                    div r10
                     add r9, rdx
-
-                    xor rdx, rdx
-                    idiv r10
-
-                    xor rdx, rdx
-                    idiv r10
-                    add r9, rdx
-
                     cmp r9, 5
                     jle .third
 
@@ -363,72 +353,63 @@ MagicMetric:        ; x in rdi
 .third:
                     mov rax, rdi
                     mov r10, 10
-                    xor rdx, rdx
-                    idiv r10
-                    xor rdx, rdx
-                    idiv r10
-                    xor rdx, rdx
-                    idiv r10
-
+                    cqo
+                    div r10
+                    cqo
+                    div r10
+                    cqo
+                    div r10
                     mov r9, rdx
-                    ; second in r9
-
-                    xor rdx, rdx
 
                     mov r10, 1000
-                    idiv r10
-                    xor rdx, rdx
+                    cqo
+                    div r10
+
                     mov r10, 10
-                    idiv r10
+                    cqo
+                    div r10
 
-                    ; sixth in rdx
-
-                    cmp rdx, r9
+                    cmp r9, rdx
                     jne .fourth
 
                     inc r8
 .fourth:
                     mov rax, rdi
                     mov r10, 10
-
-                    xor rdx, rdx
-                    idiv r10
+                    cqo
+                    div r10
                     mov rcx, rdx
-
-                    xor rdx, rdx
-                    idiv r10
+                    cqo
+                    div r10
                     mov r9, rdx
-
-                    xor rdx, rdx
-                    idiv r10
+                    cqo
+                    div r10
                     mov r11, rdx
+                    cqo
+                    div r10
+                    mov rsi, rdx
 
-                    xor rdx, rdx
-                    idiv r10
-                    mov r12, rdx
+                    cqo
+                    div r10
+                    cmp rdx, rsi
+                    jne .return
 
-                    xor rdx, rdx
-                    idiv r10
-                    cmp rdx, r12
-                    jne .after_fourth
-
-                    xor rdx, rdx
-                    idiv r10
+                    cqo
+                    div r10
                     cmp rdx, r11
-                    jne .after_fourth
+                    jne .return
 
-                    xor rdx, rdx
-                    idiv r10
+                    cqo
+                    div r10
                     cmp rdx, r9
-                    jne .after_fourth
+                    jne .return
 
-                    xor rdx, rdx
-                    idiv r10
+                    cqo
+                    div r10
                     cmp rdx, rcx
-                    jne .after_fourth
+                    jne .return
 
                     inc r8
-.after_fourth:
-                    mov rax, r8
 .return:
+                    mov rax, r8
                     ret
