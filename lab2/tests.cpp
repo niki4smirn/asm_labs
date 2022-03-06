@@ -144,26 +144,37 @@ TEST(Function, Simple) {
   ASSERT_EQ(Function(18), -5834);
 }
 
+int64_t RightFunction(int64_t x) {
+  int64_t res;
+  if (x < -1) {
+    res = 2 * x * x - 3;
+  } else if (x <= 17) {
+    double val = (36 - x * x) * 1.0 / (10 - 3 * x);
+    if (val < 0) {
+      res = std::floor(val);
+    } else {
+      res = std::ceil(val);
+    }
+  } else {
+    res = - x * x * x - 2;
+  }
+  return res;
+}
+
+TEST(Function, Range) {
+  int kAbsBound = 100;
+  for (int64_t x = -kAbsBound; x <= kAbsBound; ++x) {
+    ASSERT_EQ(Function(x), RightFunction(x)) << x;
+  }
+}
+
 TEST(Function, Generator) {
   const int kAbsLimit = 2e5;
   RandomGenerator gen(-kAbsLimit, kAbsLimit);
   const int kTestsCount = 1e7;
   for (int _ = 0; _ < kTestsCount; ++_) {
     int64_t x = gen.GetValue();
-    int64_t res;
-    if (x < -1) {
-      res = 2 * x * x - 3;
-    } else if (x <= 17) {
-      double val = (36 - x * x) * 1.0 / (10 - 3 * x);
-      if (val < 0) {
-        res = std::floor(val);
-      } else {
-        res = std::ceil(val);
-      }
-    } else {
-      res = - x * x * x - 2;
-    }
-    ASSERT_EQ(Function(x), res) << x;
+    ASSERT_EQ(Function(x), RightFunction(x)) << x;
   }
 }
 

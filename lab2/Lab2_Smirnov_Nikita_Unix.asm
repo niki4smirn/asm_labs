@@ -121,33 +121,27 @@ Function:           ; x in rdi
                     sub r8, rdi
                     ; 10 - 3x in r8
 
-                    mov r10, r8
-                    ; in r10 stores value to make ceil
-                    cmp r10, 0
-                    jge .skip_abs
-                    neg r10
-.skip_abs:
-                    dec r10
-
                     mov rax, rdi
                     imul rax
-                    mov r9, 36
-                    sub r9, rax
-                    ; 36 - x^2 in r9
+                    neg rax
+                    add rax, 36
+                    ; 36 - x^2 in rax
 
-                    cmp r9, 0
-                    jl .sub
-                    jmp .add
-.sub:
-                    sub r9, r10
-                    jmp .end_if
-.add:
-                    add r9, r10
-.end_if:
-                    mov rax, r9
                     cqo
                     idiv r8
 
+                    cmp rdx, 0
+                    je .after_change
+                    cmp rax, 0
+                    jle .sub
+                    jmp .add
+
+.sub:
+                    dec rax
+                    jmp .after_change
+.add:
+                    inc rax
+.after_change:
                     jmp .return
 .third_branch:
                     mov rax, rdi
