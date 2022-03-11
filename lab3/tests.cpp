@@ -53,3 +53,30 @@ TEST(AsmBitCount, Generator) {
 }
 
 // ---------------------------------------------------------
+
+TEST(AsmFactorial, Simple) {
+  ASSERT_EQ(AsmFactorial(1), 2);
+  ASSERT_EQ(AsmFactorial(2), 6);
+  ASSERT_EQ(AsmFactorial(6), 24);
+}
+
+int64_t Factorial(int32_t x) {
+  int64_t res = 1;
+  int64_t cur = 1;
+  while (res <= x) {
+    res *= cur;
+    ++cur;
+  }
+  return res;
+}
+
+TEST(AsmFactorial, Generator) {
+  RandomGenerator gen(1, std::numeric_limits<int32_t>::max());
+  const int kTestsCount = 1e7;
+  for (int _ = 0; _ < kTestsCount; ++_) {
+    uint64_t x = gen.GetValue();
+    ASSERT_EQ(AsmFactorial(x), Factorial(x)) << x;
+  }
+}
+
+// ---------------------------------------------------------

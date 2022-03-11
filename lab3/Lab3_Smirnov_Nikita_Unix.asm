@@ -22,8 +22,18 @@ AsmBitCount:        ; x in rdi
 .return:
                     ret
 
-AsmFactorial:
-                    ; YOUR_CODE_HERE
+AsmFactorial:       ; x in rdi
+                    mov rcx, 1
+                    mov rax, 1
+.loop_begin:
+                    cmp rax, rdi
+                    jg .return
+
+                    inc rcx
+                    mul rcx
+
+                    jmp .loop_begin
+.return:
                     ret
 
 AsmIsSquare:
