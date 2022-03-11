@@ -36,8 +36,48 @@ AsmFactorial:       ; x in rdi
 .return:
                     ret
 
-AsmIsSquare:
-                    ; YOUR_CODE_HERE
+AsmIsSquare:        ; x in rdi
+                    ; l in r8, mid in r9, r in r10
+                    mov r8, 1
+                    mov r10, rdi
+.loop_begin:
+                    mov r9, r8
+                    add r9, r10
+                    shr r9, 1
+
+                    cmp r8, r10
+                    jge .loop_end
+
+                    mov r11, 0xffffffff
+                    cmp r9, r11
+                    jg .dec_branch
+
+                    mov rax, r9
+                    mul rax
+
+                    cmp rax, rdi
+                    jl .inc_branch
+
+.dec_branch:
+                    mov r10, r9
+                    jmp .after_branches
+.inc_branch:
+                    mov r8, r9
+                    inc r8
+.after_branches:
+                    jmp .loop_begin
+
+.loop_end:
+                    mov rax, r9
+                    mul rax
+                    cmp rax, rdi
+                    jne .false
+.true:
+                    mov rax, 1
+                    jmp .return
+.false:
+                    xor rax, rax
+.return:
                     ret
 
 AsmRemoveDigits:

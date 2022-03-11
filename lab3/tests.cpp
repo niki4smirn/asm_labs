@@ -80,3 +80,27 @@ TEST(AsmFactorial, Generator) {
 }
 
 // ---------------------------------------------------------
+
+TEST(AsmIsSquare, Simple) {
+  ASSERT_TRUE(AsmIsSquare(1));
+  ASSERT_FALSE(AsmIsSquare(2));
+  ASSERT_FALSE(AsmIsSquare(3));
+  ASSERT_TRUE(AsmIsSquare(4));
+  ASSERT_TRUE(AsmIsSquare((1LL << 31) * (1LL << 31)));
+}
+
+bool IsSquare(int64_t x) {
+  int64_t sq = sqrtl(x);
+  return sq * sq == x;
+}
+
+TEST(AsmIsSquare, Generator) {
+  RandomGenerator gen(1, std::numeric_limits<int64_t>::max());
+  const int kTestsCount = 1e6;
+  for (int _ = 0; _ < kTestsCount; ++_) {
+    uint64_t x = gen.GetValue();
+    ASSERT_EQ(AsmIsSquare(x), IsSquare(x)) << x;
+  }
+}
+
+// ---------------------------------------------------------
