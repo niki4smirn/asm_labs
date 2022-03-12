@@ -124,8 +124,47 @@ AsmRemoveDigits:    ; ans in r8
 .return:
                     ret
 
-AsmFormula:
-                    ; YOUR_CODE_HERE
+AsmFormula:         ; x in rdi, n in rsi
+                    ; prev parentheses result in r8
+                    mov r8, 1
+                    ; result in rax
+                    mov rax, 1
+                    ; counter in rcx
+                    mov rcx, 1
+.loop_begin:
+                    cmp rcx, rsi
+                    jg .loop_end
+
+                    inc rcx
+
+                    imul r8, rdi
+                    jo .overflow
+
+                    mov r9, 1
+                    and r9, rcx
+
+                    cmp r9, 0
+                    je .subtract
+
+                    add r8, rcx
+                    jmp .after_subtract
+.subtract:
+                    sub r8, rcx
+.after_subtract:
+
+                    jo .overflow
+
+                    imul rax, r8
+
+                    jmp .loop_begin
+.loop_end:
+
+                    jmp .return
+
+.overflow:
+                    mov rax, -1
+
+.return:
                     ret
 
 AsmBankDeposit:

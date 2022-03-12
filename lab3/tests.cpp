@@ -148,3 +148,41 @@ TEST(AsmRemoveDigits, Generator) {
 }
 
 // ---------------------------------------------------------
+
+int64_t Formula(int64_t x, int64_t n) {
+  // no overflow check
+  int64_t res = 1;
+  int64_t prev_res = 1;
+  for (int i = 1; i <= n; ++i) {
+    prev_res *= x;
+    if (i % 2) {
+      prev_res -= i + 1;
+    } else {
+      prev_res += i + 1;
+    }
+    res *= prev_res;
+  }
+  return res;
+}
+
+TEST(AsmFormula, Simple) {
+  ASSERT_EQ(AsmFormula(0, 1), -2);
+  ASSERT_EQ(AsmFormula(0, 1), Formula(0, 1));
+  ASSERT_EQ(AsmFormula(1, 1), -1);
+  ASSERT_EQ(AsmFormula(1, 1), Formula(1, 1));
+  ASSERT_EQ(AsmFormula(1, 2), -2);
+  ASSERT_EQ(AsmFormula(1, 2), Formula(1, 2));
+}
+
+TEST(AsmFormula, Generator) {
+  RandomGenerator x_gen(-10, 10);
+  RandomGenerator n_gen(1, 10);
+  const int kTestsCount = 1e7;
+  for (int _ = 0; _ < kTestsCount; ++_) {
+    int64_t x = x_gen.GetValue();
+    int64_t n = n_gen.GetValue();
+    ASSERT_EQ(AsmFormula(x, n), Formula(x, n)) << x << ' ' << n;
+  }
+}
+
+// ---------------------------------------------------------
