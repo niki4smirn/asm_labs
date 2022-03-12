@@ -244,3 +244,28 @@ TEST(AsmEvenDivisors, All) {
 }
 
 // ---------------------------------------------------------
+
+uint64_t InfiniteManipulations(uint64_t n) {
+  int ones_count = __builtin_popcountll(n);
+  uint64_t min = (1ULL << ones_count) - 1;
+  uint64_t max = (min << (64 - ones_count));
+  return max - min;
+}
+
+TEST(AsmInfiniteManipulations, Simple) {
+  ASSERT_EQ(AsmInfiniteManipulations(1), 9'223'372'036'854'775'807ull);
+  ASSERT_EQ(AsmInfiniteManipulations(9'223'372'036'854'775'807),
+            9'223'372'036'854'775'807ull);
+  ASSERT_EQ(AsmInfiniteManipulations(std::numeric_limits<uint64_t>::max()), 0);
+}
+
+TEST(AsmInfiniteManipulations, All) {
+  RandomGenerator gen(1, std::numeric_limits<uint64_t>::max());
+  const int kTestsCount = 1e7;
+  for (int _ = 0; _ < kTestsCount; ++_) {
+    uint64_t x = gen.GetValue();
+    ASSERT_EQ(AsmInfiniteManipulations(x), InfiniteManipulations(x)) << x;
+  }
+}
+
+// ---------------------------------------------------------

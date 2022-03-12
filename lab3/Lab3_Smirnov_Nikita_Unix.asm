@@ -147,6 +147,7 @@ AsmFormula:         ; x in rdi, n in rsi
                     je .subtract
 
                     add r8, rcx
+                    jo .overflow
                     jmp .after_subtract
 .subtract:
                     sub r8, rcx
@@ -215,5 +216,30 @@ AsmEvenDivisors:    ; n in rdi
                     ret
 
 AsmInfiniteManipulations:
-                    ; YOUR_CODE_HERE
+                    ; x in rdi
+                    xor rax, rax
+.loop_begin:
+                    cmp rdi, 0
+                    je .loop_end
+                    mov rdx, 1
+                    and rdx, rdi
+                    add rax, rdx
+                    shr rdi, 1
+                    jmp .loop_begin
+.loop_end:
+                    mov rcx, rax
+                    ; ones count in rcx
+                    mov r8, 1
+                    shl r8, cl
+                    dec r8
+                    ; min in r8
+
+                    mov r9, r8
+                    sub cl, 64
+                    neg cl
+                    shl r9, cl
+                    ; max in r9
+
+                    sub r9, r8
+                    mov rax, r9
                     ret
