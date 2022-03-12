@@ -189,8 +189,29 @@ AsmBankDeposit:     ; x in rdi, y in rsi
                     mov rax, rdi
                     ret
 
-AsmEvenDivisors:
-                    ; YOUR_CODE_HERE
+AsmEvenDivisors:    ; n in rdi
+                    mov rcx, 1
+                    ; m in rcx
+                    xor r8, r8
+                    ; ans in r8
+
+.loop_begin:
+                    cmp rcx, rdi
+                    jge .loop_end
+
+                    mov rax, rdi
+                    cqo
+                    div rcx
+
+                    cmp rax, rdx
+                    jne .after_add
+
+                    inc r8
+.after_add:
+                    inc rcx
+                    jmp .loop_begin
+.loop_end:
+                    mov rax, r8
                     ret
 
 AsmInfiniteManipulations:

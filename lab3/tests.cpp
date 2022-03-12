@@ -216,3 +216,31 @@ TEST(AsmBankDeposit, Generator) {
 
 
 // ---------------------------------------------------------
+
+uint16_t EvenDivisors(uint16_t n) {
+  uint16_t res = 0;
+  for (int i = 1; i < n; ++i) {
+    if (n / i == n % i) {
+      ++res;
+    }
+  }
+  return res;
+}
+
+TEST(AsmEvenDivisors, Simple) {
+  ASSERT_EQ(AsmEvenDivisors(1), 0);
+  ASSERT_EQ(AsmEvenDivisors(2), 0);
+  ASSERT_EQ(AsmEvenDivisors(3), 1);
+  ASSERT_EQ(AsmEvenDivisors(5), 1);
+}
+
+TEST(AsmEvenDivisors, All) {
+  RandomGenerator gen(0, std::numeric_limits<uint16_t>::max());
+  const int kTestsCount = 500;
+  for (int _ = 0; _ < kTestsCount; ++_) {
+    uint64_t x = gen.GetValue();
+    ASSERT_EQ(AsmEvenDivisors(x), EvenDivisors(x)) << x;
+  }
+}
+
+// ---------------------------------------------------------
