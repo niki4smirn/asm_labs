@@ -80,8 +80,48 @@ AsmIsSquare:        ; x in rdi
 .return:
                     ret
 
-AsmRemoveDigits:
-                    ; YOUR_CODE_HERE
+AsmRemoveDigits:    ; ans in r8
+                    xor r8, r8
+                    movsx rax, edi
+                    ; x in rax
+                    mov r10, 10
+                    mov r11, 1
+                    ; multiplier in r11
+
+                    ; sign flag in rcx
+                    xor rcx, rcx
+                    cmp rax, 0
+                    jg .loop_begin
+
+                    neg rax
+                    mov rcx, 1
+.loop_begin:
+                    cmp rax, 0
+                    je .loop_end
+
+                    cqo
+                    div r10
+
+                    mov r9, 1
+                    and r9, rdx
+
+                    cmp r9, 0
+                    je .loop_begin
+
+                    imul rdx, r11
+                    add r8, rdx
+
+                    imul r11, r10
+                    jmp .loop_begin
+
+.loop_end:
+                    mov rax, r8
+
+                    cmp rcx, 1
+                    jne .return
+
+                    neg rax
+.return:
                     ret
 
 AsmFormula:

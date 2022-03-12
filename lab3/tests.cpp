@@ -104,3 +104,47 @@ TEST(AsmIsSquare, Generator) {
 }
 
 // ---------------------------------------------------------
+
+TEST(AsmRemoveDigits, Simple) {
+  ASSERT_EQ(AsmRemoveDigits(1), 1);
+  ASSERT_EQ(AsmRemoveDigits(2), 0);
+  ASSERT_EQ(AsmRemoveDigits(324), 3);
+  ASSERT_EQ(AsmRemoveDigits(541), 51);
+
+  ASSERT_EQ(AsmRemoveDigits(-1), -1);
+  ASSERT_EQ(AsmRemoveDigits(-2), 0);
+  ASSERT_EQ(AsmRemoveDigits(-324), -3);
+  ASSERT_EQ(AsmRemoveDigits(-541), -51);
+}
+
+bool IsEvenDigit(char c) {
+  if (c < '0' || c > '9' || (c - '0') % 2 == 1) {
+    return false;
+  }
+  return true;
+}
+
+int32_t RemoveEvenDigits(int32_t x) {
+  std::string x_str = std::to_string(x);
+  x_str = std::string(x_str.begin(),
+                      std::remove_if(x_str.begin(), x_str.end(), IsEvenDigit));
+  int32_t value;
+  if (x_str.empty() || x_str == "-") {
+    value = 0;
+  } else {
+    value = std::stoi(x_str);
+  }
+  return value;
+}
+
+TEST(AsmRemoveDigits, Generator) {
+  RandomGenerator gen(std::numeric_limits<int32_t>::min(),
+                      std::numeric_limits<int32_t>::max());
+  const int kTestsCount = 1e7;
+  for (int _ = 0; _ < kTestsCount; ++_) {
+    uint64_t x = gen.GetValue();
+    ASSERT_EQ(AsmRemoveDigits(x), RemoveEvenDigits(x)) << x;
+  }
+}
+
+// ---------------------------------------------------------
