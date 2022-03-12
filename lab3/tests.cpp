@@ -186,3 +186,33 @@ TEST(AsmFormula, Generator) {
 }
 
 // ---------------------------------------------------------
+
+int64_t BankDeposit(uint64_t initial_sum, int32_t percentage, int32_t years) {
+  for (int i = 1; i <= years; ++i) {
+    initial_sum += initial_sum * percentage / 100;
+  }
+  return initial_sum;
+}
+
+TEST(AsmBankDeposit, Simple) {
+  ASSERT_EQ(BankDeposit(1, 100, 0), 1);
+  ASSERT_EQ(BankDeposit(1, 100, 1), 2);
+  ASSERT_EQ(BankDeposit(2, 50, 2), 4);
+  ASSERT_EQ(BankDeposit(2, 50, 3), 6);
+}
+
+TEST(AsmBankDeposit, Generator) {
+  RandomGenerator percentage_gen(0, 100);
+  RandomGenerator years_gen(1, 20);
+  const int kTestsCount = 1e6;
+  for (int _ = 0; _ < kTestsCount; ++_) {
+    uint64_t x = 100;
+    int32_t y = percentage_gen.GetValue();
+    int32_t z = years_gen.GetValue();
+    ASSERT_EQ(AsmBankDeposit(x, y, z), BankDeposit(x, y, z))
+        << x << ' ' << y << ' ' << z;
+  }
+}
+
+
+// ---------------------------------------------------------

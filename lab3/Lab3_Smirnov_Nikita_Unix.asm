@@ -167,8 +167,26 @@ AsmFormula:         ; x in rdi, n in rsi
 .return:
                     ret
 
-AsmBankDeposit:
-                    ; YOUR_CODE_HERE
+AsmBankDeposit:     ; x in rdi, y in rsi
+                    mov rcx, rdx
+                    ; z in rcx
+.loop_begin:
+                    cmp rcx, 0
+                    je .loop_end
+
+                    mov rax, rdi
+                    mul rsi
+
+                    mov r10, 100
+                    div r10
+                    add rdi, rax
+
+                    dec rcx
+
+                    jmp .loop_begin
+
+.loop_end:
+                    mov rax, rdi
                     ret
 
 AsmEvenDivisors:
