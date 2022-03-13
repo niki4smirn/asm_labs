@@ -22,11 +22,13 @@ AsmBitCount:        ; x in rdi
 .return:
                     ret
 
-AsmFactorial:       ; x in rdi
+AsmFactorial:
+                    movsx rsi, edi
+                    ; x in rsi
                     mov rcx, 1
                     mov rax, 1
 .loop_begin:
-                    cmp rax, rdi
+                    cmp rax, rsi
                     jg .return
 
                     inc rcx
@@ -41,12 +43,12 @@ AsmIsSquare:        ; x in rdi
                     mov r8, 1
                     mov r10, rdi
 .loop_begin:
+                    cmp r8, r10
+                    jge .loop_end
+
                     mov r9, r8
                     add r9, r10
                     shr r9, 1
-
-                    cmp r8, r10
-                    jge .loop_end
 
                     mov r11, 0xffffffff
                     cmp r9, r11
@@ -68,7 +70,7 @@ AsmIsSquare:        ; x in rdi
                     jmp .loop_begin
 
 .loop_end:
-                    mov rax, r9
+                    mov rax, r8
                     mul rax
                     cmp rax, rdi
                     jne .false
@@ -157,7 +159,8 @@ AsmFormula:         ; x in rdi, n in rsi
 
                     imul rax, r8
 
-                    jmp .loop_begin
+                    cmp rax, 0
+                    jne .loop_begin
 .loop_end:
 
                     jmp .return
@@ -168,17 +171,20 @@ AsmFormula:         ; x in rdi, n in rsi
 .return:
                     ret
 
-AsmBankDeposit:     ; x in rdi, y in rsi
-                    mov rcx, rdx
+AsmBankDeposit:     ; x in rdi
+                    movsx r8, esi
+                    ; y in r8
+                    movsx rcx, edx
                     ; z in rcx
 .loop_begin:
                     cmp rcx, 0
                     je .loop_end
 
                     mov rax, rdi
-                    mul rsi
+                    mul r8
 
                     mov r10, 100
+                    cqo
                     div r10
                     add rdi, rax
 
@@ -190,7 +196,9 @@ AsmBankDeposit:     ; x in rdi, y in rsi
                     mov rax, rdi
                     ret
 
-AsmEvenDivisors:    ; n in rdi
+AsmEvenDivisors:
+                    movzx rdi, di
+                    ; n in rdi
                     mov rcx, 1
                     ; m in rcx
                     xor r8, r8

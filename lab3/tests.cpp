@@ -172,6 +172,7 @@ TEST(AsmFormula, Simple) {
   ASSERT_EQ(AsmFormula(1, 1), Formula(1, 1));
   ASSERT_EQ(AsmFormula(1, 2), -2);
   ASSERT_EQ(AsmFormula(1, 2), Formula(1, 2));
+  ASSERT_EQ(AsmFormula(2, std::numeric_limits<int64_t>::max()), 0);
 }
 
 TEST(AsmFormula, Generator) {
