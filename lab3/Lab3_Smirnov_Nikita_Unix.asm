@@ -152,11 +152,10 @@ AsmFormula:         ; x in rdi, n in rsi
                     jmp .after_subtract
 .subtract:
                     sub r8, rcx
-.after_subtract:
-
                     jo .overflow
-
+.after_subtract:
                     imul rax, r8
+                    jo .overflow
 
                     cmp rax, 0
                     jne .loop_begin
