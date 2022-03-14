@@ -87,6 +87,8 @@ TEST(AsmIsSquare, Simple) {
   ASSERT_FALSE(AsmIsSquare(3));
   ASSERT_TRUE(AsmIsSquare(4));
   ASSERT_TRUE(AsmIsSquare((1LL << 31) * (1LL << 31)));
+  int64_t test_val = (1LL << 31) - 1;
+  ASSERT_TRUE(AsmIsSquare(test_val * test_val));
 }
 
 bool IsSquare(int64_t x) {

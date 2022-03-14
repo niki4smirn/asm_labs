@@ -58,15 +58,14 @@ AsmIsSquare:        ; x in rdi
                     mul rax
 
                     cmp rax, rdi
-                    jl .inc_branch
+                    jb .inc_branch
 
 .dec_branch:
                     mov r10, r9
-                    jmp .after_branches
+                    jmp .loop_begin
 .inc_branch:
                     mov r8, r9
                     inc r8
-.after_branches:
                     jmp .loop_begin
 
 .loop_end:
