@@ -1,6 +1,7 @@
                     global AsmProduct
                     global AsmSpecialSum
                     global AsmArrayFormula
+                    global AsmCompare
 
                     section .text
 
@@ -136,3 +137,45 @@ AsmArrayFormula:    ; &array in rdi
                     mov rax, r8
 
                     ret
+
+AsmCompare:         ; &array1 in rdi
+                    ; size1 in rsi
+                    ; &array2 in rdx
+                    ; size2 in rcx
+                    ; ans in rax
+                    mov rax, rsi
+.ext_loop_begin:
+                    cmp rsi, 0
+                    je .ext_loop_end
+
+                    dec rsi
+                    ; array2_pos in r8
+                    xor r8, r8
+                    ; was in r9
+                    xor r9, r9
+
+                    lea r10, [rdi + 8 * rsi]
+                    mov r10, [r10]
+
+.int_loop_begin:
+                    cmp r8, rcx
+                    je .int_loop_end
+
+                    lea r11, [rdx + 8 * r8]
+                    mov r11, [r11]
+
+                    cmp r10, r11
+                    jne .bad
+                    mov r9, 1
+.bad:
+                    inc r8
+
+                    jmp .int_loop_begin
+.int_loop_end:
+
+                   sub rax, r9
+
+                   jmp .ext_loop_begin
+
+.ext_loop_end:
+                   ret

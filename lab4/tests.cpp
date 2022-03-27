@@ -6,6 +6,9 @@ extern "C" int64_t AsmSpecialSum(
     const int64_t* array, int64_t size, int64_t module);
 extern "C" int64_t AsmArrayFormula(
     const int32_t* array, int32_t size);
+extern "C" int64_t AsmCompare(
+    const int64_t* array1, int64_t size1,
+    const int64_t* array2, int64_t size2);
 
 // ---------------------------------------------------------
 
@@ -233,5 +236,72 @@ TEST(AsmArrayFormula, Generator) {
     }
     ASSERT_EQ(AsmArrayFormula(array, size),
               RightArrayFormula(array, size)) << helpers::ArrToStr(array, size);
+  }
+}
+
+// ---------------------------------------------------------
+int64_t RightCompare(
+    const int64_t* array1, int64_t size1,
+    const int64_t* array2, int64_t size2) {
+  int64_t ans = 0;
+  for (int i = 0; i < size1; ++i) {
+    bool was = false;
+    for (int j = 0; j < size2; ++j) {
+      if (array1[i] == array2[j]) {
+        was = true;
+      }
+    }
+    if (!was) {
+      ++ans;
+    }
+  }
+  return ans;
+}
+
+TEST(AsmCompare, Simple) {
+  {
+    ASSERT_EQ(AsmCompare(nullptr, 0, nullptr, 0), 0);
+  }
+  {
+    auto* array1 = new int64_t[]{1, 2, 3, 42};
+    auto* array2 = new int64_t[]{1, 2, 3, 42};
+    ASSERT_EQ(AsmCompare(array1, 4, array2, 4), 0);
+    delete[] array1;
+    delete[] array2;
+  }
+  {
+    auto* array1 = new int64_t[]{1, 2, 3, 42};
+    auto* array2 = new int64_t[]{1, 2, 3};
+    ASSERT_EQ(AsmCompare(array1, 4, array2, 3), 1);
+    delete[] array1;
+    delete[] array2;
+  }
+  {
+    auto* array1 = new int64_t[]{1, 2, 3, 42, 15};
+    ASSERT_EQ(AsmCompare(array1, 5, nullptr, 0), 5);
+    delete[] array1;
+  }
+}
+
+TEST(AsmCompare, Generator) {
+  const int kTestsCount = 1e5;
+  RandomGenerator<int64_t> size_gen{1, 100};
+  for (int _ = 0; _ < kTestsCount; ++_) {
+    int64_t size1 = size_gen.GetValue();
+    int64_t size2 = size_gen.GetValue();
+    auto* array1 = new int64_t[size1];
+    auto* array2 = new int64_t[size2];
+    int64_t bound_value = std::numeric_limits<int64_t>::max();
+    RandomGenerator<int64_t> array_gen{-bound_value, bound_value};
+    for (int i = 0; i < size1; ++i) {
+      array1[i] = array_gen.GetValue();
+    }
+    for (int i = 0; i < size2; ++i) {
+      array2[i] = array_gen.GetValue();
+    }
+    ASSERT_EQ(AsmCompare(array1, size1, array2, size2),
+              RightCompare(array1, size1, array2, size2))
+              << helpers::ArrToStr(array1, size1) << '\n'
+              << helpers::ArrToStr(array2, size2);
   }
 }
