@@ -1,5 +1,6 @@
                     global AsmProduct
                     global AsmSpecialSum
+                    global AsmArrayFormula
 
                     section .text
 
@@ -95,5 +96,43 @@ AsmSpecialSum:      ; &array in rdi
                     jg .loop_begin
 
                     mov rax, r10
+
+                    ret
+
+AsmArrayFormula:    ; &array in rdi
+                    movsx rsi, esi
+                    ; size in rsi
+                    ; counter in rcx
+                    xor rcx, rcx
+                    ; ans in r8
+                    xor r8, r8
+.loop_begin:
+                    cmp rcx, rsi
+                    jge .loop_end
+                    lea r9, [rdi + 4 * rcx]
+                    movsx r10, DWORD [r9]
+                    inc rcx
+                    imul r10, rcx
+
+                    add r9, 4
+                    movsx r11, DWORD [r9]
+                    inc rcx
+                    imul r11, rcx
+
+                    imul r10, r11
+
+                    mov r11, rcx
+                    and r11, 3
+                    cmp r11, 0
+                    jne .not_neg
+
+                    neg r10
+.not_neg:
+
+                    add r8, r10
+
+                    jmp .loop_begin
+.loop_end:
+                    mov rax, r8
 
                     ret

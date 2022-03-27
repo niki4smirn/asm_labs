@@ -4,6 +4,8 @@ extern "C" int32_t AsmProduct(
     const int32_t* array, int32_t size, int32_t module);
 extern "C" int64_t AsmSpecialSum(
     const int64_t* array, int64_t size, int64_t module);
+extern "C" int64_t AsmArrayFormula(
+    const int32_t* array, int32_t size);
 
 // ---------------------------------------------------------
 
@@ -173,5 +175,63 @@ TEST(AsmSpecialSum, Generator) {
     ASSERT_EQ(AsmSpecialSum(array, size, module),
               RightSpecialSum(array, size, module))
               << helpers::ArrToStr(array, size) << ' ' << module;
+  }
+}
+
+// ---------------------------------------------------------
+
+extern "C" int64_t RightArrayFormula(
+    const int32_t* array, int32_t size) {
+  int64_t res = 0;
+  for (int i = 0; i < size; i += 2) {
+    int64_t cur = (i + 1) * array[i] * (i + 2) * array[i + 1];
+    if (i % 4 == 0) {
+      res += cur;
+    } else {
+      res -= cur;
+    }
+  }
+  return res;
+}
+
+TEST(AsmArrayFormula, Simple) {
+  {
+    ASSERT_EQ(AsmArrayFormula(nullptr, 0), 0);
+  }
+  {
+    auto* array = new int32_t[]{1, 2, 3, 42};
+    ASSERT_EQ(AsmArrayFormula(array, 4), -1508);
+    delete[] array;
+  }
+  {
+    auto* array = new int32_t[]{100, 1};
+    ASSERT_EQ(AsmArrayFormula(array, 2), 200);
+    delete[] array;
+  }
+  {
+    auto* array = new int32_t[]{1, 1, 1, 1, 1, 1};
+    ASSERT_EQ(AsmArrayFormula(array, 6), 20);
+    delete[] array;
+  }
+  {
+    auto* array = new int32_t[]{0, 2, 3, 0, 49, 0};
+    ASSERT_EQ(AsmArrayFormula(array, 6), 0);
+    delete[] array;
+  }
+}
+
+TEST(AsmArrayFormula, Generator) {
+  const int kTestsCount = 1e5;
+  RandomGenerator<int32_t> size_gen{1, 8};
+  for (int _ = 0; _ < kTestsCount; ++_) {
+    int32_t size = 2 * size_gen.GetValue();
+    auto* array = new int32_t[size];
+    int32_t bound_value = 10;
+    RandomGenerator<int32_t> array_gen{-bound_value, bound_value};
+    for (int i = 0; i < size; ++i) {
+      array[i] = array_gen.GetValue();
+    }
+    ASSERT_EQ(AsmArrayFormula(array, size),
+              RightArrayFormula(array, size)) << helpers::ArrToStr(array, size);
   }
 }
