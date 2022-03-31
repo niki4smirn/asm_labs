@@ -11,6 +11,8 @@ extern "C" int64_t AsmCompare(
     const int64_t* array2, int64_t size2);
 extern "C" void AsmSimpleModify(int32_t* array, int32_t size);
 extern "C" void AsmSetToSequence(int64_t* array, int32_t size);
+extern "C" void AsmRotateInGroups(
+    int64_t* array, int32_t size, int32_t k);
 
 // ---------------------------------------------------------
 
@@ -467,6 +469,91 @@ TEST(AsmSetToSequence, Generator) {
     }
     AsmSetToSequence(array1, size);
     RightSetToSequence(array2, size);
+    ASSERT_TRUE(helpers::AreEqual(array1, size, array2, size))
+                  << helpers::ArrToStr(non_modified_array, size) << '\n'
+                  << helpers::ArrToStr(array1, size) << '\n'
+                  << helpers::ArrToStr(array2, size);
+  }
+}
+
+// ---------------------------------------------------------
+
+void RightRotateInGroups(int64_t* array, int32_t size, int32_t k) {
+  for (int32_t i = 0; i < size; i += k) {
+    int32_t bound = std::min(size, i + k);
+    int64_t first = array[i];
+    for (int32_t j = i; j < bound; ++j) {
+      array[j] = array[j + 1];
+    }
+    array[bound - 1] = first;
+  }
+}
+
+TEST(AsmRotateInGroups, Simple) {
+  {
+    int64_t* array = nullptr;
+    int32_t size = 0;
+    int32_t k = 228;
+    EXPECT_NO_FATAL_FAILURE(AsmRotateInGroups(array, size, k));
+  }
+  {
+    auto* array = new int64_t[]{1, 2, 3, 4, 5};
+    auto* ans = new int64_t[]{1, 2, 3, 4, 5};
+    int32_t size = 5;
+    int32_t k = 1;
+    AsmRotateInGroups(array, size, k);
+    EXPECT_TRUE(helpers::AreEqual(array, size, ans, size))
+              << helpers::ArrToStr(array, size) << '\n'
+              << helpers::ArrToStr(ans, size);
+  }
+  {
+    auto* array = new int64_t[]{1, 2, 3, 4, 5};
+    auto* ans = new int64_t[]{2, 1, 4, 3, 5};
+    int32_t size = 5;
+    int32_t k = 2;
+    AsmRotateInGroups(array, size, k);
+    EXPECT_TRUE(helpers::AreEqual(array, size, ans, size))
+              << helpers::ArrToStr(array, size) << '\n'
+              << helpers::ArrToStr(ans, size);
+  }
+  {
+    auto* array = new int64_t[]{1, 2, 3, 4, 5, 6, 7};
+    auto* ans = new int64_t[]{2, 3, 1, 5, 6, 4, 7};
+    int32_t size = 7;
+    int32_t k = 3;
+    AsmRotateInGroups(array, size, k);
+    EXPECT_TRUE(helpers::AreEqual(array, size, ans, size))
+              << helpers::ArrToStr(array, size) << '\n'
+              << helpers::ArrToStr(ans, size);
+  }
+  {
+    auto* array = new int64_t[]{1, 2, 3, 4, 5, 6, 7, 8};
+    auto* ans = new int64_t[]{2, 3, 1, 5, 6, 4, 8, 7};
+    int32_t size = 8;
+    int32_t k = 3;
+    AsmRotateInGroups(array, size, k);
+    EXPECT_TRUE(helpers::AreEqual(array, size, ans, size))
+              << helpers::ArrToStr(array, size) << '\n'
+              << helpers::ArrToStr(ans, size);
+  }
+}
+
+TEST(AsmRotateInGroups, Generator) {
+  const int kTestsCount = 1e5;
+  RandomGenerator<int32_t> size_gen{1, 100};
+  for (int _ = 0; _ < kTestsCount; ++_) {
+    int32_t size = size_gen.GetValue();
+    int32_t k = size_gen.GetValue();
+    auto* non_modified_array = new int64_t[size];
+    auto* array1 = new int64_t[size];
+    auto* array2 = new int64_t[size];
+    auto bound_value = std::numeric_limits<int64_t>::max();
+    RandomGenerator<int64_t> array_gen{-bound_value, bound_value};
+    for (int i = 0; i < size; ++i) {
+      non_modified_array[i] = array2[i] = array1[i] = array_gen.GetValue();
+    }
+    AsmRotateInGroups(array1, size, k);
+    RightRotateInGroups(array2, size, k);
     ASSERT_TRUE(helpers::AreEqual(array1, size, array2, size))
                   << helpers::ArrToStr(non_modified_array, size) << '\n'
                   << helpers::ArrToStr(array1, size) << '\n'

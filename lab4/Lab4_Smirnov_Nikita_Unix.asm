@@ -4,6 +4,7 @@
                     global AsmCompare
                     global AsmSimpleModify
                     global AsmSetToSequence
+                    global AsmRotateInGroups
 
                     section .text
 
@@ -290,4 +291,53 @@ AsmSetToSequence:   ; &array in rdi
                     inc r10
                     jmp .fill_loop_begin
 .fill_loop_end:
+                    ret
+
+AsmRotateInGroups:  ; &array in rdi
+                    movsx rsi, esi
+                    ; size in rsi
+                    movsx rdx, edx
+                    ; k in rdx
+
+                    xor r8, r8
+                    ; i in r8
+
+.group_loop_begin:
+                    cmp r8, rsi
+                    jnl .group_loop_end
+
+                    mov r10, r8
+                    add r10, rdx
+                    cmp r10, rsi
+                    jng .after_decrease
+                    mov r10, rsi
+.after_decrease:
+                    ; bound in r10
+                    lea rax, [rdi + 8 * r8]
+                    mov r11, QWORD [rax]
+                    ; first in r11
+
+                    mov r9, r8
+                    ; j in r9
+.rotate_loop_begin:
+                    cmp r9, r10
+                    jnl .rotate_loop_end
+
+                    lea rax, [rdi + 8 * r9 + 8]
+                    mov rcx, QWORD [rax]
+
+                    lea rax, [rdi + 8 * r9]
+                    mov QWORD [rax], rcx
+
+                    inc r9
+                    jmp .rotate_loop_begin
+.rotate_loop_end:
+
+                    dec r9
+                    lea rax, [rdi + 8 * r9]
+                    mov QWORD [rax], r11
+
+                    add r8, rdx
+                    jmp .group_loop_begin
+.group_loop_end:
                     ret
