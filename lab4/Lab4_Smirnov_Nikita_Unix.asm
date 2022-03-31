@@ -6,6 +6,7 @@
                     global AsmSetToSequence
                     global AsmRotateInGroups
                     global AsmRemoveIfSimilar
+                    global AsmReplaceWithGroup
 
                     section .text
 
@@ -394,4 +395,76 @@ AsmRemoveIfSimilar: ; &array in rdi
                     jmp .loop_begin
 .loop_end:
                     mov rax, r9
+                    ret
+
+AsmReplaceWithGroup:
+                    ; &array in rdi
+                    ; &size in rsi
+                    movsx rcx, edx
+                    ; k in rcx
+
+                    xor r8d, r8d
+                    ; new_size in r8d
+
+                    xor r9, r9
+                    ; i in r9
+
+.new_size_loop_begin:
+                    cmp r9d, DWORD [rsi]
+                    jge .new_size_loop_end
+
+                    lea rax, [rdi + 8 * r9]
+                    mov rax, QWORD [rax]
+                    ; array[i] in rax
+
+                    add rax, rcx
+                    dec rax
+
+                    cqo
+                    idiv rcx
+
+                    add r8, rax
+
+                    inc r9
+                    jmp .new_size_loop_begin
+.new_size_loop_end:
+
+                    movsx r10, r8d
+                    dec r10
+                    ; insert_pos in r10
+
+                    dec r9
+                    ; r9 is still i
+
+.fill_loop_begin:
+                    cmp r9, 0
+                    jl .fill_loop_end
+                    lea r11, [rdi + 8 * r9]
+                    mov r11, QWORD [r11]
+                    ; cur_val in r11
+
+                    mov rax, r11
+                    add rax, rcx
+                    dec rax
+
+                    cqo
+                    idiv rcx
+                    ; count in rax
+
+.count_loop_begin:
+                    cmp rax, 0
+                    jle .count_loop_end
+
+                    lea rdx, [rdi + 8 * r10]
+                    mov QWORD [rdx], r11
+
+                    dec r10
+                    dec rax
+                    jmp .count_loop_begin
+.count_loop_end:
+
+                    dec r9
+                    jmp .fill_loop_begin
+.fill_loop_end:
+                    mov DWORD [rsi], r8d
                     ret

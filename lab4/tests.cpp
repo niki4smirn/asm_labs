@@ -16,6 +16,8 @@ extern "C" void AsmRotateInGroups(
 extern "C" int32_t AsmRemoveIfSimilar(
     int64_t* array, int32_t size,
     int64_t x, int64_t d);
+extern "C" void AsmReplaceWithGroup(
+    int64_t* array, int32_t* size, int32_t k);
 
 // ---------------------------------------------------------
 
@@ -131,6 +133,7 @@ TEST(AsmProduct, Generator) {
     ASSERT_EQ(AsmProduct(array, size, module),
               RightProduct(array, size, module))
               << helpers::ArrToStr(array, size) << ' ' << module;
+    delete[] array;
   }
 }
 
@@ -200,6 +203,7 @@ TEST(AsmSpecialSum, Generator) {
     ASSERT_EQ(AsmSpecialSum(array, size, module),
               RightSpecialSum(array, size, module))
               << helpers::ArrToStr(array, size) << ' ' << module;
+    delete[] array;
   }
 }
 
@@ -258,6 +262,7 @@ TEST(AsmArrayFormula, Generator) {
     }
     ASSERT_EQ(AsmArrayFormula(array, size),
               RightArrayFormula(array, size)) << helpers::ArrToStr(array, size);
+    delete[] array;
   }
 }
 
@@ -325,6 +330,8 @@ TEST(AsmCompare, Generator) {
               RightCompare(array1, size1, array2, size2))
               << helpers::ArrToStr(array1, size1) << '\n'
               << helpers::ArrToStr(array2, size2);
+    delete[] array1;
+    delete[] array2;
   }
 }
 
@@ -359,6 +366,8 @@ TEST(AsmSimpleModify, Simple) {
     EXPECT_TRUE(helpers::AreEqual(array, size, ans, size))
               << helpers::ArrToStr(array, size) << '\n'
               << helpers::ArrToStr(ans, size);
+    delete[] array;
+    delete[] ans;
   }
   {
     auto* array = new int32_t[]{1, 2, 5};
@@ -368,6 +377,8 @@ TEST(AsmSimpleModify, Simple) {
     EXPECT_TRUE(helpers::AreEqual(array, size, ans, size))
               << helpers::ArrToStr(array, size) << '\n'
               << helpers::ArrToStr(ans, size);
+    delete[] array;
+    delete[] ans;
   }
   {
     auto* array = new int32_t[]{1, 2, 3, 4, 5, 6, 7, 8};
@@ -376,7 +387,9 @@ TEST(AsmSimpleModify, Simple) {
     AsmSimpleModify(array, size);
     EXPECT_TRUE(helpers::AreEqual(array, size, ans, size))
         << helpers::ArrToStr(array, size) << '\n'
-        << helpers::ArrToStr(ans, size);;
+        << helpers::ArrToStr(ans, size);
+    delete[] array;
+    delete[] ans;
   }
 }
 
@@ -399,6 +412,9 @@ TEST(AsmSimpleModify, Generator) {
                   << helpers::ArrToStr(non_modified_array, size) << '\n'
                   << helpers::ArrToStr(array1, size) << '\n'
                   << helpers::ArrToStr(array2, size);
+    delete[] non_modified_array;
+    delete[] array1;
+    delete[] array2;
   }
 }
 
@@ -436,6 +452,8 @@ TEST(AsmSetToSequence, Simple) {
     EXPECT_TRUE(helpers::AreEqual(array, size, ans, size))
               << helpers::ArrToStr(array, size) << '\n'
               << helpers::ArrToStr(ans, size);
+    delete[] array;
+    delete[] ans;
   }
   {
     auto* array = new int64_t[]{5, 0, 1, 2, 3, 6, 4};
@@ -445,6 +463,8 @@ TEST(AsmSetToSequence, Simple) {
     EXPECT_TRUE(helpers::AreEqual(array, size, ans, size))
               << helpers::ArrToStr(array, size) << '\n'
               << helpers::ArrToStr(ans, size);
+    delete[] array;
+    delete[] ans;
   }
   {
     auto* array = new int64_t[]{4, 6, 3, 2, 1, 0, 5};
@@ -454,6 +474,8 @@ TEST(AsmSetToSequence, Simple) {
     EXPECT_TRUE(helpers::AreEqual(array, size, ans, size))
               << helpers::ArrToStr(array, size) << '\n'
               << helpers::ArrToStr(ans, size);
+    delete[] array;
+    delete[] ans;
   }
 }
 
@@ -476,6 +498,9 @@ TEST(AsmSetToSequence, Generator) {
                   << helpers::ArrToStr(non_modified_array, size) << '\n'
                   << helpers::ArrToStr(array1, size) << '\n'
                   << helpers::ArrToStr(array2, size);
+    delete[] non_modified_array;
+    delete[] array1;
+    delete[] array2;
   }
 }
 
@@ -508,6 +533,8 @@ TEST(AsmRotateInGroups, Simple) {
     EXPECT_TRUE(helpers::AreEqual(array, size, ans, size))
               << helpers::ArrToStr(array, size) << '\n'
               << helpers::ArrToStr(ans, size);
+    delete[] array;
+    delete[] ans;
   }
   {
     auto* array = new int64_t[]{1, 2, 3, 4, 5};
@@ -518,6 +545,8 @@ TEST(AsmRotateInGroups, Simple) {
     EXPECT_TRUE(helpers::AreEqual(array, size, ans, size))
               << helpers::ArrToStr(array, size) << '\n'
               << helpers::ArrToStr(ans, size);
+    delete[] array;
+    delete[] ans;
   }
   {
     auto* array = new int64_t[]{1, 2, 3, 4, 5, 6, 7};
@@ -528,6 +557,8 @@ TEST(AsmRotateInGroups, Simple) {
     EXPECT_TRUE(helpers::AreEqual(array, size, ans, size))
               << helpers::ArrToStr(array, size) << '\n'
               << helpers::ArrToStr(ans, size);
+    delete[] array;
+    delete[] ans;
   }
   {
     auto* array = new int64_t[]{1, 2, 3, 4, 5, 6, 7, 8};
@@ -538,6 +569,8 @@ TEST(AsmRotateInGroups, Simple) {
     EXPECT_TRUE(helpers::AreEqual(array, size, ans, size))
               << helpers::ArrToStr(array, size) << '\n'
               << helpers::ArrToStr(ans, size);
+    delete[] array;
+    delete[] ans;
   }
 }
 
@@ -562,6 +595,9 @@ TEST(AsmRotateInGroups, Generator) {
                   << helpers::ArrToStr(array1, size) << '\n'
                   << helpers::ArrToStr(array2, size) << '\n'
                   << k;
+    delete[] non_modified_array;
+    delete[] array1;
+    delete[] array2;
   }
 }
 
@@ -603,6 +639,8 @@ TEST(AsmRemoveIfSimilar, Simple) {
     EXPECT_TRUE(helpers::AreEqual(array, ans_size, ans, ans_size))
               << helpers::ArrToStr(array, ans_size) << '\n'
               << helpers::ArrToStr(ans, ans_size);
+    delete[] array;
+    delete[] ans;
   }
   {
     auto* array = new int64_t[]{3};
@@ -615,6 +653,8 @@ TEST(AsmRemoveIfSimilar, Simple) {
     EXPECT_TRUE(helpers::AreEqual(array, ans_size, ans, ans_size))
               << helpers::ArrToStr(array, ans_size) << '\n'
               << helpers::ArrToStr(ans, ans_size);
+    delete[] array;
+    delete[] ans;
   }
   {
     auto* array = new int64_t[]{1, 2, -3, 4};
@@ -627,6 +667,8 @@ TEST(AsmRemoveIfSimilar, Simple) {
     EXPECT_TRUE(helpers::AreEqual(array, ans_size, ans, ans_size))
               << helpers::ArrToStr(array, ans_size) << '\n'
               << helpers::ArrToStr(ans, ans_size);
+    delete[] array;
+    delete[] ans;
   }
   {
     auto* array = new int64_t[]{1, 2, 3, 4};
@@ -639,6 +681,8 @@ TEST(AsmRemoveIfSimilar, Simple) {
     EXPECT_TRUE(helpers::AreEqual(array, ans_size, ans, ans_size))
               << helpers::ArrToStr(array, ans_size) << '\n'
               << helpers::ArrToStr(ans, ans_size);
+    delete[] array;
+    delete[] ans;
   }
   {
     auto* array = new int64_t[]{3, 2, 1, 1, 2, 3, 4, 5, 6, 7, 8, 2, 4, 6};
@@ -651,6 +695,8 @@ TEST(AsmRemoveIfSimilar, Simple) {
     EXPECT_TRUE(helpers::AreEqual(array, ans_size, ans, ans_size))
               << helpers::ArrToStr(array, ans_size) << '\n'
               << helpers::ArrToStr(ans, ans_size);
+    delete[] array;
+    delete[] ans;
   }
 }
 
@@ -677,5 +723,93 @@ TEST(AsmRemoveIfSimilar, Generator) {
                   << helpers::ArrToStr(array1, new_size1) << '\n'
                   << helpers::ArrToStr(array2, new_size2) << '\n'
                   << x << ' ' << d;
+    delete[] non_modified_array;
+    delete[] array1;
+    delete[] array2;
   }
+}
+
+// ---------------------------------------------------------
+
+void RightReplaceWithGroup(int64_t* array, int32_t* size, int32_t k) {
+  int32_t new_size = 0;
+  for (int i = 0; i < *size; ++i) {
+    new_size += std::ceil(1.0 * array[i] / k);
+  }
+  int insert_pos = new_size - 1;
+  for (int i = *size - 1; i >= 0; --i) {
+    int64_t cur_val = array[i];
+    int32_t count = std::ceil(1.0 * cur_val / k);
+    while (count > 0) {
+      array[insert_pos] = cur_val;
+      --insert_pos;
+      --count;
+    }
+  }
+  *size = new_size;
+}
+
+TEST(AsmReplaceWithGroup, Simple) {
+  {
+    int64_t* array = nullptr;
+    int32_t size = 0;
+    int32_t k = 228;
+    EXPECT_NO_FATAL_FAILURE(AsmReplaceWithGroup(array, &size, k));
+  }
+  {
+    auto* array = new int64_t[]{2, 4};
+    auto* ans = new int64_t[]{2, 4};
+    int32_t size = 2;
+    int32_t ans_size = 2;
+    int32_t k = 4;
+    AsmReplaceWithGroup(array, &size, k);
+    EXPECT_EQ(size, ans_size);
+    EXPECT_TRUE(helpers::AreEqual(array, ans_size, ans, ans_size))
+              << helpers::ArrToStr(array, ans_size) << '\n'
+              << helpers::ArrToStr(ans, ans_size);
+    delete[] array;
+    delete[] ans;
+  }
+  {
+    auto* array = new int64_t[6]{2, 4};
+    auto* ans = new int64_t[]{2, 2, 4, 4, 4, 4};
+    int32_t size = 2;
+    int32_t ans_size = 6;
+    int32_t k = 1;
+    AsmReplaceWithGroup(array, &size, k);
+    EXPECT_EQ(size, ans_size);
+    EXPECT_TRUE(helpers::AreEqual(array, ans_size, ans, ans_size))
+              << helpers::ArrToStr(array, ans_size) << '\n'
+              << helpers::ArrToStr(ans, ans_size);
+    delete[] array;
+    delete[] ans;
+  }
+  {
+    auto* array = new int64_t[721]{10, 711};
+    int32_t size = 2;
+    int32_t ans_size = 721;
+    int32_t k = 1;
+    AsmReplaceWithGroup(array, &size, k);
+    EXPECT_EQ(size, ans_size);
+    delete[] array;
+  }
+  {
+    auto* array = new int64_t[22]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    auto* ans = new int64_t[]{1, 2, 3, 4, 4, 5, 5, 6, 6, 7, 7, 7, 8, 8, 8,
+                              9, 9, 9, 10, 10, 10, 10};
+    int32_t size = 10;
+    int32_t ans_size = 22;
+    int32_t k = 3;
+    AsmReplaceWithGroup(array, &size, k);
+    EXPECT_EQ(size, ans_size);
+    EXPECT_TRUE(helpers::AreEqual(array, ans_size, ans, ans_size))
+              << helpers::ArrToStr(array, ans_size) << '\n'
+              << helpers::ArrToStr(ans, ans_size);
+    delete[] array;
+    delete[] ans;
+  }
+}
+
+TEST(AsmReplaceWithGroup, Generator) {
+    // I have had some problems with it, so it's empty :(
 }
