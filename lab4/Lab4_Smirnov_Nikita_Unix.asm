@@ -2,6 +2,7 @@
                     global AsmSpecialSum
                     global AsmArrayFormula
                     global AsmCompare
+                    global AsmSimpleModify
 
                     section .text
 
@@ -173,9 +174,54 @@ AsmCompare:         ; &array1 in rdi
                     jmp .int_loop_begin
 .int_loop_end:
 
-                   sub rax, r9
+                    sub rax, r9
 
-                   jmp .ext_loop_begin
+                    jmp .ext_loop_begin
 
 .ext_loop_end:
-                   ret
+                    ret
+
+AsmSimpleModify:    ; &array in rdi
+                    movsx rsi, esi
+                    dec rsi
+                    ; cur_pos in esi
+.loop_begin:
+                    cmp rsi, 0
+                    jl .loop_end
+
+                    lea rax, [rdi + 4 * rsi]
+                    mov eax, DWORD [rax]
+                    ; cur_element in eax
+
+                    mov r10d, 5
+
+                    cdq
+                    idiv r10d
+
+                    cmp edx, 0
+                    jg .after_add
+                    je .first_case
+                    add edx, r10d
+.after_add:
+                    and edx, 1
+                    cmp edx, 0
+                    je .second_case
+                    jmp .third_case
+                    ; case_ans in r9d
+.first_case:
+                    mov r9d, 0
+                    jmp .after_cases
+.second_case:
+                    mov r9d, 1
+                    jmp .after_cases
+.third_case:
+                    mov r9d, -1
+                    jmp .after_cases
+.after_cases:
+                    lea rax, [rdi + 4 * rsi]
+                    mov DWORD [rax], r9d
+
+                    dec rsi
+                    jmp .loop_begin
+.loop_end:
+                    ret

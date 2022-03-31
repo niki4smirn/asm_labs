@@ -9,6 +9,7 @@ extern "C" int64_t AsmArrayFormula(
 extern "C" int64_t AsmCompare(
     const int64_t* array1, int64_t size1,
     const int64_t* array2, int64_t size2);
+extern "C" void AsmSimpleModify(int32_t* array, int32_t size);
 
 // ---------------------------------------------------------
 
@@ -48,6 +49,20 @@ std::string ArrToStr(const T* array, T size) {
     }
   }
   return result;
+}
+
+bool AreEqual(
+    const int32_t* array1, int32_t size1,
+    const int32_t* array2, int32_t size2) {
+  if (size1 != size2) {
+    return false;
+  }
+  for (int i = 0; i < size1; ++i) {
+    if (array1[i] != array2[i]) {
+      return false;
+    }
+  }
+  return true;
 }
 }  // namespace helpers
 
@@ -303,5 +318,79 @@ TEST(AsmCompare, Generator) {
               RightCompare(array1, size1, array2, size2))
               << helpers::ArrToStr(array1, size1) << '\n'
               << helpers::ArrToStr(array2, size2);
+  }
+}
+
+// ---------------------------------------------------------
+
+void RightSimpleModify(int32_t* array, int32_t size) {
+  for (int i = 0; i < size; ++i) {
+    int32_t mod5 = array[i] % 5;
+    if (mod5 < 0)  {
+      mod5 += 5;
+    }
+    if (mod5 == 0) {
+      array[i] = 0;
+    } else if ((mod5 & 1) == 0) {
+        array[i] = 1;
+    } else {
+      array[i] = -1;
+    }
+  }
+}
+
+TEST(AsmSimpleModify, Simple) {
+  {
+    int32_t* array = nullptr;
+    EXPECT_NO_FATAL_FAILURE(AsmSimpleModify(array, 0));
+  }
+  {
+    auto* array = new int32_t[]{-1};
+    auto* ans = new int32_t[]{1};
+    int32_t size = 1;
+    AsmSimpleModify(array, size);
+    EXPECT_TRUE(helpers::AreEqual(array, size, ans, size))
+              << helpers::ArrToStr(array, size) << '\n'
+              << helpers::ArrToStr(ans, size);
+  }
+  {
+    auto* array = new int32_t[]{1, 2, 5};
+    auto* ans = new int32_t[]{-1, 1, 0};
+    int32_t size = 3;
+    AsmSimpleModify(array, size);
+    EXPECT_TRUE(helpers::AreEqual(array, size, ans, size))
+              << helpers::ArrToStr(array, size) << '\n'
+              << helpers::ArrToStr(ans, size);
+  }
+  {
+    auto* array = new int32_t[]{1, 2, 3, 4, 5, 6, 7, 8};
+    auto* ans = new int32_t[]{-1, 1, -1, 1, 0, -1, 1, -1};
+    int32_t size = 8;
+    AsmSimpleModify(array, size);
+    EXPECT_TRUE(helpers::AreEqual(array, size, ans, size))
+        << helpers::ArrToStr(array, size) << '\n'
+        << helpers::ArrToStr(ans, size);;
+  }
+}
+
+TEST(AsmSimpleModify, Generator) {
+  const int kTestsCount = 1e5;
+  RandomGenerator<int32_t> size_gen{1, 100};
+  for (int _ = 0; _ < kTestsCount; ++_) {
+    int32_t size = size_gen.GetValue();
+    auto* non_modified_array = new int32_t[size];
+    auto* array1 = new int32_t[size];
+    auto* array2 = new int32_t[size];
+    int32_t bound_value = std::numeric_limits<int32_t>::max();
+    RandomGenerator<int32_t> array_gen{-bound_value, bound_value};
+    for (int i = 0; i < size; ++i) {
+      non_modified_array[i] = array2[i] = array1[i] = array_gen.GetValue();
+    }
+    AsmSimpleModify(array1, size);
+    RightSimpleModify(array2, size);
+    ASSERT_TRUE(helpers::AreEqual(array1, size, array2, size))
+                  << helpers::ArrToStr(non_modified_array, size) << '\n'
+                  << helpers::ArrToStr(array1, size) << '\n'
+                  << helpers::ArrToStr(array2, size);
   }
 }
