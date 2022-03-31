@@ -7,6 +7,7 @@
                     global AsmRotateInGroups
                     global AsmRemoveIfSimilar
                     global AsmReplaceWithGroup
+                    global AsmMerge
 
                     section .text
 
@@ -467,4 +468,73 @@ AsmReplaceWithGroup:
                     jmp .fill_loop_begin
 .fill_loop_end:
                     mov DWORD [rsi], r8d
+                    ret
+
+AsmMerge:           ; &array1 in rdi
+                    ; size1 in rsi
+                    ; &array2 in rdx
+                    ; size2 in rcx
+                    ; &result r8
+
+                    xor r9, r9
+                    ; pos1 in r9
+                    xor r10, r10
+                    ; pos2 in r10
+
+.first_loop_begin:
+                    cmp r9, rsi
+                    jge .first_loop_end
+                    cmp r10, rcx
+                    jge .first_loop_end
+
+                    lea rax, [rdi + 8 * r9]
+                    mov rax, QWORD [rax]
+
+                    lea r11, [rdx + 8 * r10]
+                    mov r11, QWORD [r11]
+
+                    cmp rax, r11
+                    jge .second_branch
+
+                    mov QWORD [r8], rax
+                    inc r9
+                    jmp .after_branches
+.second_branch:
+                    mov QWORD [r8], r11
+                    inc r10
+.after_branches:
+                    add r8, 8
+
+                    jmp .first_loop_begin
+.first_loop_end:
+
+.second_loop_begin:
+                    cmp r9, rsi
+                    jge .second_loop_end
+
+                    lea rax, [rdi + 8 * r9]
+                    mov rax, QWORD [rax]
+
+                    mov QWORD [r8], rax
+
+                    inc r9
+                    add r8, 8
+
+                    jmp .second_loop_begin
+.second_loop_end:
+
+.third_loop_begin:
+                    cmp r10, rcx
+                    jge .third_loop_end
+
+                    lea rax, [rdx + 8 * r10]
+                    mov rax, QWORD [rax]
+
+                    mov QWORD [r8], rax
+
+                    inc r10
+                    add r8, 8
+
+                    jmp .third_loop_begin
+.third_loop_end:
                     ret

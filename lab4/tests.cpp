@@ -18,6 +18,10 @@ extern "C" int32_t AsmRemoveIfSimilar(
     int64_t x, int64_t d);
 extern "C" void AsmReplaceWithGroup(
     int64_t* array, int32_t* size, int32_t k);
+extern "C" void AsmMerge(
+    const int64_t* array1, int64_t size1,
+    const int64_t* array2, int64_t size2,
+    int64_t* result);
 
 // ---------------------------------------------------------
 
@@ -812,4 +816,35 @@ TEST(AsmReplaceWithGroup, Simple) {
 
 TEST(AsmReplaceWithGroup, Generator) {
     // I have had some problems with it, so it's empty :(
+}
+
+// ---------------------------------------------------------
+
+void RightMerge(
+    const int64_t* array1, int64_t size1,
+    const int64_t* array2, int64_t size2,
+    int64_t* result) {
+  int insert_pos = 0;
+  int pos1 = 0;
+  int pos2 = 0;
+  while (pos1 < size1 && pos2 < size2) {
+    if (array1[pos1] < array2[pos2]) {
+      result[insert_pos] = array1[pos1];
+      ++pos1;
+    } else {
+      result[insert_pos] = array2[pos2];
+      ++pos2;
+    }
+    ++insert_pos;
+  }
+  while (pos1 < size1) {
+    result[insert_pos] = array1[pos1];
+    ++pos1;
+    ++insert_pos;
+  }
+  while (pos2 < size2) {
+    result[insert_pos] = array2[pos2];
+    ++pos2;
+    ++insert_pos;
+  }
 }
