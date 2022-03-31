@@ -10,6 +10,7 @@ extern "C" int64_t AsmCompare(
     const int64_t* array1, int64_t size1,
     const int64_t* array2, int64_t size2);
 extern "C" void AsmSimpleModify(int32_t* array, int32_t size);
+extern "C" void AsmSetToSequence(int64_t* array, int32_t size);
 
 // ---------------------------------------------------------
 
@@ -40,9 +41,9 @@ T RandomGenerator<T>::GetValue() {
 
 namespace helpers {
 template<typename T>
-std::string ArrToStr(const T* array, T size) {
+std::string ArrToStr(const T* array, int32_t size) {
   std::string result;
-  for (int i = 0; i < size; ++i) {
+  for (int32_t i = 0; i < size; ++i) {
     result += std::to_string(array[i]);
     if (i + 1 != size) {
       result += ", ";
@@ -51,9 +52,10 @@ std::string ArrToStr(const T* array, T size) {
   return result;
 }
 
+template<typename T>
 bool AreEqual(
-    const int32_t* array1, int32_t size1,
-    const int32_t* array2, int32_t size2) {
+    const T* array1, int32_t size1,
+    const T* array2, int32_t size2) {
   if (size1 != size2) {
     return false;
   }
@@ -388,6 +390,83 @@ TEST(AsmSimpleModify, Generator) {
     }
     AsmSimpleModify(array1, size);
     RightSimpleModify(array2, size);
+    ASSERT_TRUE(helpers::AreEqual(array1, size, array2, size))
+                  << helpers::ArrToStr(non_modified_array, size) << '\n'
+                  << helpers::ArrToStr(array1, size) << '\n'
+                  << helpers::ArrToStr(array2, size);
+  }
+}
+
+// ---------------------------------------------------------
+
+void RightSetToSequence(int64_t* array, int32_t size) {
+  int64_t min = array[0];
+  int64_t max = array[0];
+  int32_t min_pos = 0;
+  int32_t max_pos = 0;
+  for (int i = 0; i < size; ++i) {
+    if (min > array[i]) {
+      min = array[i];
+      min_pos = i;
+    }
+    if (max < array[i]) {
+      max = array[i];
+      max_pos = i;
+    }
+  }
+  if (max_pos < min_pos) {
+    std::swap(min_pos, max_pos);
+  }
+  for (int i = min_pos; i <= max_pos; ++i) {
+    array[i] = i - min_pos + 1;
+  }
+}
+
+TEST(AsmSetToSequence, Simple) {
+  {
+    auto* array = new int64_t[]{-1524};
+    auto* ans = new int64_t[]{1};
+    int32_t size = 1;
+    AsmSetToSequence(array, size);
+    EXPECT_TRUE(helpers::AreEqual(array, size, ans, size))
+              << helpers::ArrToStr(array, size) << '\n'
+              << helpers::ArrToStr(ans, size);
+  }
+  {
+    auto* array = new int64_t[]{5, 0, 1, 2, 3, 6, 4};
+    auto* ans = new int64_t[]{5, 1, 2, 3, 4, 5, 4};
+    int32_t size = 7;
+    AsmSetToSequence(array, size);
+    EXPECT_TRUE(helpers::AreEqual(array, size, ans, size))
+              << helpers::ArrToStr(array, size) << '\n'
+              << helpers::ArrToStr(ans, size);
+  }
+  {
+    auto* array = new int64_t[]{4, 6, 3, 2, 1, 0, 5};
+    auto* ans = new int64_t[]{4, 1, 2, 3, 4, 5, 5};
+    int32_t size = 7;
+    AsmSetToSequence(array, size);
+    EXPECT_TRUE(helpers::AreEqual(array, size, ans, size))
+              << helpers::ArrToStr(array, size) << '\n'
+              << helpers::ArrToStr(ans, size);
+  }
+}
+
+TEST(AsmSetToSequence, Generator) {
+  const int kTestsCount = 1e5;
+  RandomGenerator<int32_t> size_gen{1, 100};
+  for (int _ = 0; _ < kTestsCount; ++_) {
+    int32_t size = size_gen.GetValue();
+    auto* non_modified_array = new int64_t[size];
+    auto* array1 = new int64_t[size];
+    auto* array2 = new int64_t[size];
+    auto bound_value = std::numeric_limits<int64_t>::max();
+    RandomGenerator<int64_t> array_gen{-bound_value, bound_value};
+    for (int i = 0; i < size; ++i) {
+      non_modified_array[i] = array2[i] = array1[i] = array_gen.GetValue();
+    }
+    AsmSetToSequence(array1, size);
+    RightSetToSequence(array2, size);
     ASSERT_TRUE(helpers::AreEqual(array1, size, array2, size))
                   << helpers::ArrToStr(non_modified_array, size) << '\n'
                   << helpers::ArrToStr(array1, size) << '\n'

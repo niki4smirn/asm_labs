@@ -3,6 +3,7 @@
                     global AsmArrayFormula
                     global AsmCompare
                     global AsmSimpleModify
+                    global AsmSetToSequence
 
                     section .text
 
@@ -184,7 +185,7 @@ AsmCompare:         ; &array1 in rdi
 AsmSimpleModify:    ; &array in rdi
                     movsx rsi, esi
                     dec rsi
-                    ; cur_pos in esi
+                    ; cur_pos in rsi
 .loop_begin:
                     cmp rsi, 0
                     jl .loop_end
@@ -224,4 +225,69 @@ AsmSimpleModify:    ; &array in rdi
                     dec rsi
                     jmp .loop_begin
 .loop_end:
+                    ret
+
+AsmSetToSequence:   ; &array in rdi
+                    movsx rsi, esi
+                    dec rsi
+                    ; cur_pos in rsi
+                    mov rcx, QWORD [rdi]
+                    ; min in rcx
+                    mov rdx, QWORD [rdi]
+                    ; max in rdx
+                    xor r8, r8
+                    ; min_pos in r8
+                    xor r9, r9
+                    ; max_pos in r9
+.minmax_loop_begin:
+                    cmp rsi, 0
+                    jl .minmax_loop_end
+
+                    lea rax, [rdi + 8 * rsi]
+                    mov rax, QWORD [rax]
+                    ; cur_element in rax
+
+                    cmp rax, rcx
+                    jl .update_min
+
+                    cmp rax, rdx
+                    jg .update_max
+
+                    jmp .after_updates
+
+.update_min:
+                    mov rcx, rax
+                    mov r8, rsi
+                    jmp .after_updates
+
+.update_max:
+                    mov rdx, rax
+                    mov r9, rsi
+                    jmp .after_updates
+.after_updates:
+                    dec rsi
+                    jmp .minmax_loop_begin
+.minmax_loop_end:
+
+                    cmp r8, r9
+                    jle .after_xchg
+                    xchg r8, r9
+
+.after_xchg:
+                    mov r10, r8
+                    ; r10 - cur_pos
+                    mov rax, r9
+.fill_loop_begin:
+                    cmp r10, r9
+                    jg .fill_loop_end
+
+                    lea rax, [rdi + 8 * r10]
+                    ; &cur_element in rax
+                    mov QWORD [rax], r10
+                    sub QWORD [rax], r8
+                    inc QWORD [rax]
+
+                    inc r10
+                    jmp .fill_loop_begin
+.fill_loop_end:
                     ret
