@@ -5,6 +5,7 @@
                     global AsmSimpleModify
                     global AsmSetToSequence
                     global AsmRotateInGroups
+                    global AsmRemoveIfSimilar
 
                     section .text
 
@@ -340,4 +341,57 @@ AsmRotateInGroups:  ; &array in rdi
                     add r8, rdx
                     jmp .group_loop_begin
 .group_loop_end:
+                    ret
+
+AsmRemoveIfSimilar: ; &array in rdi
+                    movsx rsi, esi
+                    ; size in rsi
+                    ; x in rdx
+                    ; d in rcx
+                    xor r9, r9
+                    ; insert_pos in r9
+                    xor r10, r10
+                    ; cur_pos in r10
+.loop_begin:
+                    cmp r10, rsi
+                    jge .loop_end
+
+                    lea r11, [rdi + 8 * r10]
+                    mov r11, QWORD [r11]
+                    ; cur_val in r11
+                    cmp r11, 0
+                    jl .insert
+
+                    mov r8, r11
+                    add r8, rcx
+                    jo .after_second_check
+                    cmp r8, rdx
+                    jo .after_second_check
+                    jl .insert
+
+.after_second_check:
+                    mov r8, r11
+                    sub r8, rcx
+                    jo .after_third_check
+                    cmp r8, rdx
+                    jo .after_third_check
+                    jg .insert
+
+.after_third_check:
+                    mov r8, r11
+                    and r8, 1
+                    cmp r8, 0
+                    je .insert
+
+                    jmp .after_insert
+.insert:
+                    lea rax, [rdi + 8 * r9]
+                    mov QWORD [rax], r11
+                    inc r9
+
+.after_insert:
+                    inc r10
+                    jmp .loop_begin
+.loop_end:
+                    mov rax, r9
                     ret

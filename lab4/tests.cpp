@@ -13,6 +13,9 @@ extern "C" void AsmSimpleModify(int32_t* array, int32_t size);
 extern "C" void AsmSetToSequence(int64_t* array, int32_t size);
 extern "C" void AsmRotateInGroups(
     int64_t* array, int32_t size, int32_t k);
+extern "C" int32_t AsmRemoveIfSimilar(
+    int64_t* array, int32_t size,
+    int64_t x, int64_t d);
 
 // ---------------------------------------------------------
 
@@ -557,6 +560,122 @@ TEST(AsmRotateInGroups, Generator) {
     ASSERT_TRUE(helpers::AreEqual(array1, size, array2, size))
                   << helpers::ArrToStr(non_modified_array, size) << '\n'
                   << helpers::ArrToStr(array1, size) << '\n'
-                  << helpers::ArrToStr(array2, size);
+                  << helpers::ArrToStr(array2, size) << '\n'
+                  << k;
+  }
+}
+
+// ---------------------------------------------------------
+
+int32_t RightRemoveIfSimilar(
+    int64_t* array, int32_t size,
+    int64_t x, int64_t d) {
+  int32_t insert_pos = 0;
+  for (int i = 0; i < size; ++i) {
+    int64_t cur_val = array[i];
+    if (x > cur_val + d ||
+        cur_val - d > x ||
+        cur_val < 0 ||
+        (cur_val & 1) == 0) {
+      array[insert_pos] = cur_val;
+      ++insert_pos;
+    }
+  }
+  return insert_pos;
+}
+
+TEST(AsmRemoveIfSimilar, Simple) {
+  {
+    int64_t* array = nullptr;
+    int32_t size = 0;
+    int64_t x = 228;
+    int64_t d = 42;
+    EXPECT_NO_FATAL_FAILURE(AsmRemoveIfSimilar(array, size, x, d));
+  }
+  {
+    auto* array = new int64_t[]{2, 4};
+    auto* ans = new int64_t[]{2, 4};
+    int32_t size = 2;
+    int32_t ans_size = 2;
+    int64_t x = 4;
+    int64_t d = 2;
+    EXPECT_EQ(AsmRemoveIfSimilar(array, size, x, d), ans_size);
+    EXPECT_TRUE(helpers::AreEqual(array, ans_size, ans, ans_size))
+              << helpers::ArrToStr(array, ans_size) << '\n'
+              << helpers::ArrToStr(ans, ans_size);
+  }
+  {
+    auto* array = new int64_t[]{3};
+    auto* ans = new int64_t[]{};
+    int32_t size = 1;
+    int32_t ans_size = 0;
+    int64_t x = 3;
+    int64_t d = 0;
+    EXPECT_EQ(AsmRemoveIfSimilar(array, size, x, d), ans_size);
+    EXPECT_TRUE(helpers::AreEqual(array, ans_size, ans, ans_size))
+              << helpers::ArrToStr(array, ans_size) << '\n'
+              << helpers::ArrToStr(ans, ans_size);
+  }
+  {
+    auto* array = new int64_t[]{1, 2, -3, 4};
+    auto* ans = new int64_t[]{2, -3, 4};
+    int32_t size = 4;
+    int32_t ans_size = 3;
+    int64_t x = 5;
+    int64_t d = 1000;
+    EXPECT_EQ(AsmRemoveIfSimilar(array, size, x, d), ans_size);
+    EXPECT_TRUE(helpers::AreEqual(array, ans_size, ans, ans_size))
+              << helpers::ArrToStr(array, ans_size) << '\n'
+              << helpers::ArrToStr(ans, ans_size);
+  }
+  {
+    auto* array = new int64_t[]{1, 2, 3, 4};
+    auto* ans = new int64_t[]{1, 2, 4};
+    int32_t size = 4;
+    int32_t ans_size = 3;
+    int64_t x = 4;
+    int64_t d = 2;
+    EXPECT_EQ(AsmRemoveIfSimilar(array, size, x, d), ans_size);
+    EXPECT_TRUE(helpers::AreEqual(array, ans_size, ans, ans_size))
+              << helpers::ArrToStr(array, ans_size) << '\n'
+              << helpers::ArrToStr(ans, ans_size);
+  }
+  {
+    auto* array = new int64_t[]{3, 2, 1, 1, 2, 3, 4, 5, 6, 7, 8, 2, 4, 6};
+    auto* ans = new int64_t[]{2, 2, 4, 6, 7, 8, 2, 4, 6};
+    int32_t size = 14;
+    int32_t ans_size = 9;
+    int64_t x = 3;
+    int64_t d = 2;
+    EXPECT_EQ(AsmRemoveIfSimilar(array, size, x, d), ans_size);
+    EXPECT_TRUE(helpers::AreEqual(array, ans_size, ans, ans_size))
+              << helpers::ArrToStr(array, ans_size) << '\n'
+              << helpers::ArrToStr(ans, ans_size);
+  }
+}
+
+TEST(AsmRemoveIfSimilar, Generator) {
+  const int kTestsCount = 1e5;
+  RandomGenerator<int32_t> size_gen{1, 100};
+  for (int _ = 0; _ < kTestsCount; ++_) {
+    int32_t size = size_gen.GetValue();
+    auto* non_modified_array = new int64_t[size];
+    auto* array1 = new int64_t[size];
+    auto* array2 = new int64_t[size];
+    auto bound_value = std::numeric_limits<int64_t>::max() / 3;
+    RandomGenerator<int64_t> array_gen{-bound_value, bound_value};
+    for (int i = 0; i < size; ++i) {
+      non_modified_array[i] = array2[i] = array1[i] = array_gen.GetValue();
+    }
+    auto x = array_gen.GetValue();
+    auto d = std::abs(array_gen.GetValue());
+
+    int32_t new_size1 = AsmRemoveIfSimilar(array1, size, x, d);
+    int32_t new_size2 = RightRemoveIfSimilar(array2, size, x, d);
+    ASSERT_TRUE(helpers::AreEqual(array1, new_size1, array2, new_size2))
+                  << helpers::ArrToStr(non_modified_array, size) << '\n'
+                  << helpers::ArrToStr(array1, new_size1) << '\n'
+                  << helpers::ArrToStr(array2, new_size2) << '\n'
+                  << x << ' ' << d;
   }
 }
