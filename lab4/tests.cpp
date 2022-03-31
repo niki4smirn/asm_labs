@@ -22,6 +22,10 @@ extern "C" void AsmMerge(
     const int64_t* array1, int64_t size1,
     const int64_t* array2, int64_t size2,
     int64_t* result);
+extern "C" void AsmModify2D(
+    int64_t** array, int64_t n, int64_t m);
+extern "C" int32_t AsmFindSorted(
+    const int32_t** array, int32_t n, int32_t m);
 
 // ---------------------------------------------------------
 

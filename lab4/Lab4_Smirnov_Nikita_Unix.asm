@@ -8,6 +8,8 @@
                     global AsmRemoveIfSimilar
                     global AsmReplaceWithGroup
                     global AsmMerge
+                    global AsmModify2D
+                    global AsmFindSorted
 
                     section .text
 
@@ -537,4 +539,88 @@ AsmMerge:           ; &array1 in rdi
 
                     jmp .third_loop_begin
 .third_loop_end:
+                    ret
+
+AsmModify2D:        ; &&array in rdi
+                    mov rcx, rdx
+                    xchg rsi, rcx
+                    ; lines_count in rsi
+                    ; columns_count in rcx
+                    xor r8, r8
+                    ; i in r8
+.lines_loop_begin:
+                    cmp r8, rsi
+                    jge .lines_loop_end
+                    xor r9, r9
+                    ; j in r9
+.columns_loop_begin:
+                    cmp r9, rcx
+                    jge .columns_loop_end
+
+                    mov rax, QWORD [rdi + 8 * r8]
+                    mov r11, QWORD [rax + 8 * r9]
+                    ; array[i][j] in r11
+
+                    cmp r11, 0
+                    jl .negative
+                    mov r10, 2
+                    imul r11, r10
+
+                    jmp .after_change
+.negative:
+                    inc r11
+.after_change:
+                    mov QWORD [rax + 8 * r9], r11
+
+                    inc r9
+                    jmp .columns_loop_begin
+.columns_loop_end:
+
+                    inc r8
+                    jmp .lines_loop_begin
+.lines_loop_end:
+                    ret
+
+AsmFindSorted:      ; &&array in rdi
+                    movsx rsi, esi
+                    movsx rcx, edx
+                    xchg rsi, rcx
+                    ; lines_count in rsi
+                    ; columns_count in rcx
+
+                    xor rax, rax
+                    ; ans in rax
+
+                    xor r8, r8
+                    ; i in r8
+.lines_loop_begin:
+                    cmp r8, rsi
+                    jge .lines_loop_end
+
+                    mov r9, 1
+.columns_loop_begin:
+                    cmp r9, rcx
+                    jge .columns_loop_end
+
+                    dec r9
+                    mov r10, QWORD [rdi + 8 * r8]
+                    mov r10d, DWORD [r10 + 4 * r9]
+                    inc r9
+                    ; array[i][j - 1] in r10d
+
+                    mov r11, QWORD [rdi + 8 * r8]
+                    mov r11d, DWORD [r11 + 4 * r9]
+                    ; array[i][j] in r11d
+
+                    cmp r10d, r11d
+                    jge .after_ans_update
+
+                    inc r9
+                    jmp .columns_loop_begin
+.columns_loop_end:
+                    add rax, r8
+.after_ans_update:
+                    inc r8
+                    jmp .lines_loop_begin
+.lines_loop_end:
                     ret
