@@ -6,6 +6,8 @@ extern "C" uint32_t AsmFindNearest(
 extern "C" void AsmSummarizeRows(
     const uint64_t** a, uint32_t n, uint32_t m, uint64_t* b);
 
+extern "C" uint32_t AsmCountIfNot(
+    const uint16_t* a, uint32_t n, bool(*pred)(uint16_t x));
 
 
 // ---------------------------------------------------------
@@ -90,5 +92,19 @@ TEST(SummarizeRows, Sample) {
   AsmSummarizeRows(const_cast<const uint64_t**>(a), rows_count, cols_count, b);
   for (int i = 0; i < rows_count; ++i) {
     std::cout << b[i] << '\n';
+    delete[] a[i];
   }
+  delete[] a;
+  delete[] b;
 }
+
+// ---------------------------------------------------------
+
+TEST(CountIfNot, Sample) {
+  std::vector<uint16_t> vec = {1, 2, 3, 4, 5, 6, 7};
+  std::cout << AsmCountIfNot(vec.data(), vec.size(), [](uint16_t value) {
+    return value % 2 == 0;
+  });
+}
+
+// ---------------------------------------------------------

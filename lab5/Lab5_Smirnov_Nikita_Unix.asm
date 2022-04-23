@@ -2,6 +2,7 @@
                     global Metric
                     global AsmSummarizeRows
                     global CalculateArraySum
+                    global AsmCountIfNot
 
                     section .text
 
@@ -118,8 +119,8 @@ CalculateArraySum:
 
 AsmSummarizeRows:
                     ; &a in rdi
-                    ; rows in rsi
-                    ; cols in rdx
+                    ; rows in esi
+                    ; cols in edx
                     ; &b in rcx
 
                     push r12
@@ -130,11 +131,11 @@ AsmSummarizeRows:
                     mov r12, rdi
                     ; &a in r12
 
-                    mov r13, rsi
+                    movsx r13, esi
                     ; rows in r13
                     dec r13
 
-                    mov r14, rdx
+                    movsx r14, edx
                     ; cols in r14
 
                     mov r15, rcx
@@ -159,5 +160,53 @@ AsmSummarizeRows:
                     pop r14
                     pop r13
                     pop r12
+
+                    ret
+
+AsmCountIfNot:
+                    ; &array in rdi
+                    ; size in esi
+                    ; &predicate in rdx
+
+                    push rbx
+                    push r12
+                    push r13
+                    push r15
+
+                    mov r12, rdi
+                    ; &array in r12
+
+                    movsx r13, esi
+                    ; size in r13
+                    dec r13
+
+                    mov r15, rdx
+                    ; &predicate in r15
+
+                    xor rbx, rbx
+                    ; ans in rbx
+
+.loop_begin:
+                    cmp r13, 0
+                    jl .loop_end
+
+                    movsx rdi, WORD [r12 + 2 * r13]
+
+                    call r15
+
+                    cmp rax, 0
+                    jne .not_update
+                    inc rbx
+
+.not_update:
+                    dec r13
+                    jmp .loop_begin
+.loop_end:
+
+                    mov rax, rbx
+                    pop r15
+                    pop r13
+                    pop r12
+                    pop rbx
 
                     ret
