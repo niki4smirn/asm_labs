@@ -4,8 +4,10 @@
                     global CalculateArraySum
                     global AsmCountIfNot
                     global AsmGetMoreMagic
+                    global AsmCopy
 
                     extern GetMagic
+                    extern malloc
 
                     section .text
 
@@ -248,3 +250,34 @@ AsmGetMoreMagic:
                     mul rax
                     ret
 
+AsmCopy:
+                    ; &array in rdi
+                    ; size in esi
+                    cmp esi, 0
+                    jne .not_nullptr
+                    xor rax, rax
+                    ret
+.not_nullptr:
+                    push r12
+                    push r13
+
+                    mov r12, rdi
+                    movsx r13, esi
+
+                    mov rdi, r13
+                    call malloc
+                    dec r13
+.loop_begin:
+                    cmp r13, 0
+                    jl .loop_end
+
+                    mov r8b, BYTE [r12 + r13]
+                    mov BYTE [rax + r13], r8b
+
+                    dec r13
+                    jmp .loop_begin
+.loop_end:
+
+                    pop r13
+                    pop r12
+                    ret

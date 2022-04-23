@@ -15,6 +15,8 @@ extern "C" uint8_t GetMagic(uint64_t x) {
 
 extern "C" uint64_t AsmGetMoreMagic();
 
+extern "C" void* AsmCopy(const void* data, uint32_t size);
+
 
 // ---------------------------------------------------------
 
@@ -117,4 +119,21 @@ TEST(CountIfNot, Sample) {
 
 TEST(GetMoreMagic, Sample) {
   EXPECT_EQ(AsmGetMoreMagic(), 36);
+}
+
+// ---------------------------------------------------------
+
+TEST(Copy, Sample) {
+  {
+    uint32_t size = 10;
+    char* array = new char[size];
+    for (int i = 0; i < size; ++i) {
+      array[i] = 'a' + i;
+    }
+    char* result = static_cast<char*>(AsmCopy(static_cast<const void*>(array),
+                                              size));
+    for (int i = 0; i < size; ++i) {
+      EXPECT_EQ(result[i], 'a' + i);
+    }
+  }
 }
