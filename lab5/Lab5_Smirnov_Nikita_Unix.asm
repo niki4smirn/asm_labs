@@ -1,5 +1,7 @@
                     global AsmFindNearest
                     global Metric
+                    global AsmSummarizeRows
+                    global CalculateArraySum
 
                     section .text
 
@@ -78,10 +80,6 @@ AsmFindNearest:
 .loop_end:
                     mov rax, QWORD [rsp]
 
-                    ;
-                    mov rax, r15
-                    ;
-
                     add rsp, 8
 
                     mov rdi, r14
@@ -98,4 +96,68 @@ AsmFindNearest:
                     add rsp, 8
 
 .no_r9_end:
+                    ret
+
+CalculateArraySum:
+                    ; &array in rdi
+                    ; array_size in rsi
+                    xor rax, rax
+                    ; ans in rax
+                    xor rcx, rcx
+                    ; counter in rcx
+.loop_begin:
+                    cmp rcx, rsi
+                    jge .loop_end
+
+                    add rax, QWORD [rdi + 8 * rcx]
+
+                    inc rcx
+                    jmp .loop_begin
+.loop_end:
+                    ret
+
+AsmSummarizeRows:
+                    ; &a in rdi
+                    ; rows in rsi
+                    ; cols in rdx
+                    ; &b in rcx
+
+                    push r12
+                    push r13
+                    push r14
+                    push r15
+
+                    mov r12, rdi
+                    ; &a in r12
+
+                    mov r13, rsi
+                    ; rows in r13
+                    dec r13
+
+                    mov r14, rdx
+                    ; cols in r14
+
+                    mov r15, rcx
+                    ; &b in r15
+
+.loop_begin:
+                    cmp r13, 0
+                    jl .loop_end
+
+                    mov rdi, QWORD [r12 + 8 * r13]
+                    mov rsi, r14
+
+                    call CalculateArraySum
+
+                    mov QWORD [r15 + 8 * r13], rax
+
+                    dec r13
+                    jmp .loop_begin
+.loop_end:
+
+                    pop r15
+                    pop r14
+                    pop r13
+                    pop r12
+
                     ret

@@ -1,8 +1,11 @@
 #include <gtest/gtest.h>
 
-extern "C"
 extern "C" uint32_t AsmFindNearest(
     uint32_t x, uint32_t y, uint32_t n, uint32_t x1, uint32_t y1, ...);
+
+extern "C" void AsmSummarizeRows(
+    const uint64_t** a, uint32_t n, uint32_t m, uint64_t* b);
+
 
 
 // ---------------------------------------------------------
@@ -65,4 +68,27 @@ bool AreEqual(
 
 TEST(FindNearest, Sample) {
   std::cout << AsmFindNearest(0, 0, 4, 100, 100, 2, 3, 0, 9, 10, 11);
+}
+
+// ---------------------------------------------------------
+
+extern "C" uint64_t CalculateArraySum(const uint64_t* array, int64_t size);
+
+TEST(SummarizeRows, Sample) {
+  int rows_count = 5;
+  int cols_count = 3;
+  auto** a = new uint64_t*[rows_count];
+  for (int i = 0; i < rows_count; ++i) {
+    a[i] = new uint64_t[cols_count];
+  }
+  for (int i = 0; i < rows_count; ++i) {
+    for (int j = 0; j < cols_count; ++j) {
+      a[i][j] = i + j;
+    }
+  }
+  auto* b = new uint64_t[cols_count];
+  AsmSummarizeRows(const_cast<const uint64_t**>(a), rows_count, cols_count, b);
+  for (int i = 0; i < rows_count; ++i) {
+    std::cout << b[i] << '\n';
+  }
 }
