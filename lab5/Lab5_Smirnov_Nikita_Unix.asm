@@ -5,6 +5,7 @@
                     global AsmCountIfNot
                     global AsmGetMoreMagic
                     global AsmCopy
+                    global AsmSequencesCount
 
                     extern GetMagic
                     extern malloc
@@ -280,4 +281,66 @@ AsmCopy:
 
                     pop r13
                     pop r12
+                    ret
+
+AsmSequencesCount:
+                    ; n in rdi
+                    ; k in rsi
+
+                    cmp rdi, 0
+                    jge .non_negative_n
+                    xor rax, rax
+                    ret
+
+.non_negative_n:
+                    cmp rdi, rsi
+                    jge .not_easy
+                    cmp rdi, 64
+                    jge .zero
+                    mov rax, 1
+                    mov rcx, rdi
+                    shl rax, cl
+                    jmp .after_zero
+.zero:
+                    xor rax, rax
+.after_zero:
+                    ret
+
+.not_easy:
+                    push r12
+                    push r13
+                    push r14
+
+                    mov r12, rdi
+                    mov r13, rsi
+
+                    sub rsp, 8
+
+                    mov r14, 1
+                    ; counter in r14
+                    mov QWORD [rsp], 0
+
+.loop_begin:
+                    cmp r14, r13
+                    jg .loop_end
+
+                    mov rdi, r12
+                    sub rdi, r14
+                    mov rsi, r13
+
+                    call AsmSequencesCount
+
+                    add QWORD [rsp], rax
+
+                    inc r14
+                    jmp .loop_begin
+.loop_end:
+                    mov rax, QWORD [rsp]
+
+                    add rsp, 8
+
+                    pop r14
+                    pop r13
+                    pop r12
+
                     ret

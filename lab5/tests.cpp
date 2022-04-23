@@ -17,6 +17,8 @@ extern "C" uint64_t AsmGetMoreMagic();
 
 extern "C" void* AsmCopy(const void* data, uint32_t size);
 
+extern "C" uint64_t AsmSequencesCount(uint64_t n, uint64_t k);
+
 
 // ---------------------------------------------------------
 
@@ -136,4 +138,16 @@ TEST(Copy, Sample) {
       EXPECT_EQ(result[i], 'a' + i);
     }
   }
+}
+
+// ---------------------------------------------------------
+
+TEST(SequencesCount, Sample) {
+  ASSERT_EQ(AsmSequencesCount(4, 2), 8);
+  ASSERT_EQ(AsmSequencesCount(0, 2), 1);
+  ASSERT_EQ(AsmSequencesCount(1, 2), 2);
+  ASSERT_EQ(AsmSequencesCount(2, 2), 3);
+  ASSERT_EQ(AsmSequencesCount(3, 3), 7);
+  ASSERT_EQ(AsmSequencesCount(5, 2), 13);
+  ASSERT_EQ(AsmSequencesCount(4, 3), 13);
 }
