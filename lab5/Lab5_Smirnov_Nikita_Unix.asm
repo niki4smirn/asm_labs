@@ -3,6 +3,9 @@
                     global AsmSummarizeRows
                     global CalculateArraySum
                     global AsmCountIfNot
+                    global AsmGetMoreMagic
+
+                    extern GetMagic
 
                     section .text
 
@@ -210,3 +213,38 @@ AsmCountIfNot:
                     pop rbx
 
                     ret
+
+AsmGetMoreMagic:
+                    mov rdi, 1
+                    call GetMagic
+
+                    sub rsp, 8
+                    movzx rax, al
+                    mov QWORD [rsp], rax
+
+                    mov rdi, 2
+                    call GetMagic
+                    movzx rdi, al
+                    call GetMagic
+
+                    movzx rax, al
+
+                    mul QWORD [rsp]
+                    mov QWORD [rsp], rax
+
+                    mov rdi, 3
+                    call GetMagic
+                    movzx rdi, al
+                    call GetMagic
+                    movzx rdi, al
+                    call GetMagic
+
+                    movzx rax, al
+
+                    mul QWORD [rsp]
+
+                    add rsp, 8
+
+                    mul rax
+                    ret
+

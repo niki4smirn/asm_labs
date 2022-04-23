@@ -9,6 +9,12 @@ extern "C" void AsmSummarizeRows(
 extern "C" uint32_t AsmCountIfNot(
     const uint16_t* a, uint32_t n, bool(*pred)(uint16_t x));
 
+extern "C" uint8_t GetMagic(uint64_t x) {
+  return x;
+}
+
+extern "C" uint64_t AsmGetMoreMagic();
+
 
 // ---------------------------------------------------------
 
@@ -102,9 +108,13 @@ TEST(SummarizeRows, Sample) {
 
 TEST(CountIfNot, Sample) {
   std::vector<uint16_t> vec = {1, 2, 3, 4, 5, 6, 7};
-  std::cout << AsmCountIfNot(vec.data(), vec.size(), [](uint16_t value) {
+  EXPECT_EQ(AsmCountIfNot(vec.data(), vec.size(), [](uint16_t value) {
     return value % 2 == 0;
-  });
+  }), 4);
 }
 
 // ---------------------------------------------------------
+
+TEST(GetMoreMagic, Sample) {
+  EXPECT_EQ(AsmGetMoreMagic(), 36);
+}
