@@ -14,17 +14,22 @@
                     section .text
 
 Metric:
+                    cmp rdi, rdx
+                    jae .no_swap1
+                    xchg rdi, rdx
+.no_swap1:
+                    cmp rsi, rcx
+                    jae .no_swap2
+                    xchg rsi, rcx
+.no_swap2:
                     sub rdi, rdx
                     mov rax, rdi
                     mul rax
-                    mov rdi, rax
-                    mov r8, rdi
+                    mov r8, rax
                     sub rsi, rcx
-                    mov rax, rcx
+                    mov rax, rsi
                     mul rax
-                    mov rcx, rax
-                    add r8, rcx
-                    mov rax, r8
+                    add rax, r8
                     ret
 
 
@@ -65,11 +70,11 @@ AsmFindNearest:
                     mov r15, rax
                     ; min_dist in r15
 
-                    mov rbx, r14
+                    mov rbx, 2
                     ; cur_index in rbx
 .loop_begin:
-                    cmp rbx, 1
-                    jle .loop_end
+                    cmp rbx, r14
+                    jg .loop_end
 
                     mov rdi, r12
                     mov rsi, r13
@@ -92,11 +97,11 @@ AsmFindNearest:
                     call Metric
 
                     cmp rax, r15
-                    ja .not_update
+                    jae .not_update
                     mov r15, rax
                     mov QWORD [rsp], rbx
 .not_update:
-                    dec rbx
+                    inc rbx
                     jmp .loop_begin
 .loop_end:
                     mov rax, QWORD [rsp]

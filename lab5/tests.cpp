@@ -64,15 +64,18 @@ TEST(Metric, MinMaxTest) {
   uint64_t min = 0;
   uint64_t max = (1LL << 31) + 42;
   ASSERT_EQ(Metric(min, min, max, max), 2 * max * max);
+  ASSERT_EQ(Metric(max, max, min, min), 2 * max * max);
 }
 
 TEST(FindNearest, Sample) {
   uint32_t max = (1LL << 31) + 42;
   ASSERT_EQ(AsmFindNearest(0, 0, 1, 0, 0), 1);
   ASSERT_EQ(AsmFindNearest(0, 0, 1, max, max), 1);
+  ASSERT_EQ(AsmFindNearest(max, max, 2, 0, 0, 1, 1), 2);
   ASSERT_EQ(AsmFindNearest(0, 0, 3, max, max, max / 2, max / 2, 1, 1), 3);
   ASSERT_EQ(AsmFindNearest(0, 0, 4, 100, 100, 2, 3, 0, 9, 10, 11), 2);
   ASSERT_EQ(AsmFindNearest(0, 0, 4, 100, 100, 1, 1, 1, 1, 1, 1), 2);
+  ASSERT_EQ(AsmFindNearest(0, 0, 4, 1, 1, 1, 1, 1, 1, 1, 1), 1);
 }
 
 // ---------------------------------------------------------
