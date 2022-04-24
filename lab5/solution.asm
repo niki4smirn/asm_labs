@@ -92,7 +92,7 @@ AsmFindNearest:
                     call Metric
 
                     cmp rax, r15
-                    jae .not_update
+                    ja .not_update
                     mov r15, rax
                     mov QWORD [rsp], rbx
 .not_update:
