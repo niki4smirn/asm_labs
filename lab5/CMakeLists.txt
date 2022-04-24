@@ -24,6 +24,6 @@ set(CMAKE_EXE_LINKER_FLAGS ${CMAKE_EXE_LINKER_FLAGS} "-no-pie")
 
 enable_language(ASM_NASM)
 
-add_executable(solution_tests Lab5_Smirnov_Nikita_Unix.asm tests.cpp)
+add_executable(solution_tests solution.asm tests.cpp)
 
 target_link_libraries(solution_tests gtest_main)
