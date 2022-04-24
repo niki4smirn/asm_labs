@@ -1,7 +1,6 @@
                     global AsmFindNearest
                     global Metric
                     global AsmSummarizeRows
-                    global CalculateArraySum
                     global AsmCountIfNot
                     global AsmGetMoreMagic
                     global AsmCopy
@@ -16,11 +15,16 @@
 
 Metric:
                     sub rdi, rdx
-                    imul rdi, rdi
                     mov rax, rdi
+                    mul rax
+                    mov rdi, rax
+                    mov r8, rdi
                     sub rsi, rcx
-                    imul rcx, rcx
-                    add rax, rcx
+                    mov rax, rcx
+                    mul rax
+                    mov rcx, rax
+                    add r8, rcx
+                    mov rax, r8
                     ret
 
 
@@ -40,18 +44,18 @@ AsmFindNearest:
 
                     mov QWORD [rsp], 1
 
-                    mov r12d, edi
-                    ; x in r12
-                    mov r13d, esi
-                    ; y in r13
-                    mov r14d, edx
-                    ; n in r14
-
                     shl rdi, 32
                     shr rdi, 32
 
                     shl rsi, 32
                     shr rsi, 32
+
+                    mov r12, rdi
+                    ; x in r12
+                    mov r13, rsi
+                    ; y in r13
+                    mov r14, rdx
+                    ; n in r14
 
                     mov edx, ecx
                     mov ecx, r8d
@@ -60,6 +64,7 @@ AsmFindNearest:
 
                     mov r15, rax
                     ; min_dist in r15
+
                     mov rbx, r14
                     ; cur_index in rbx
 .loop_begin:
@@ -87,7 +92,7 @@ AsmFindNearest:
                     call Metric
 
                     cmp rax, r15
-                    jge .not_update
+                    jae .not_update
                     mov r15, rax
                     mov QWORD [rsp], rbx
 .not_update:
@@ -180,7 +185,7 @@ AsmSummarizeRows:
 
 AsmCountIfNot:
                     ; &array in rdi
-                    ; size in si
+                    ; size in esi
                     ; &predicate in rdx
 
                     push rbx
@@ -191,7 +196,7 @@ AsmCountIfNot:
                     mov r12, rdi
                     ; &array in r12
 
-                    movzx r13, si
+                    mov r13d, esi
                     ; size in r13
                     dec r13
 
@@ -205,7 +210,7 @@ AsmCountIfNot:
                     cmp r13, 0
                     jl .loop_end
 
-                    mov di, WORD [r12 + 2 * r13]
+                    movzx rdi, WORD [r12 + 2 * r13]
 
                     call r15
 
@@ -293,13 +298,18 @@ AsmCopy:
                     ret
 
 AsmSequencesCount:
-
                     push r12
                     push r13
+                    push r14
 
                     mov r12, rdi
                     mov r13, rsi
 
+                    inc rdi
+                    call malloc
+                    mov r14, rax
+
+                    mov rdi, r12
                     inc rdi
                     shl rdi, 3
 
@@ -311,7 +321,7 @@ AsmSequencesCount:
                     cmp rcx, r12
                     jg .fill_loop_end
 
-                    mov QWORD [rax + 8 * rcx], -1
+                    mov BYTE [r14 + rcx], 0
 
                     inc rcx
                     jmp .fill_loop_begin
@@ -322,6 +332,7 @@ AsmSequencesCount:
                     mov rdi, r12
                     mov rsi, r13
                     mov rdx, rax
+                    mov rcx, r14
 
                     call AsmSequencesCountRecursion
 
@@ -331,11 +342,15 @@ AsmSequencesCount:
                     mov rdi, QWORD [rsp + 8]
                     call free
 
+                    mov rdi, r14
+                    call free
+
                     mov rax, rbx
 
                     pop rbx
                     add rsp, 8
 
+                    pop r14
                     pop r13
                     pop r12
                     ret
@@ -344,6 +359,7 @@ AsmSequencesCountRecursion:
                     ; n in rdi
                     ; k in rsi
                     ; buffer in rdx
+                    ; ready in rcx
 
                     cmp rdi, 0
                     jge .non_negative_n
@@ -362,7 +378,6 @@ AsmSequencesCountRecursion:
 .zero:
                     xor rax, rax
 .after_zero:
-                    mov QWORD [rdx + 8 * rdi], rax
                     ret
 
 .not_easy:
@@ -370,30 +385,33 @@ AsmSequencesCountRecursion:
                     push r13
                     push r14
                     push r15
+                    push rbx
 
                     mov r12, rdi
                     mov r13, rsi
+                    mov r14, rcx
                     mov r15, rdx
 
                     sub rsp, 8
 
-                    mov r14, 1
-                    ; counter in r14
                     mov QWORD [rsp], 0
 
+                    mov rbx, r13
+
 .loop_begin:
-                    cmp r14, r13
-                    jg .loop_end
+                    cmp rbx, 1
+                    jl .loop_end
 
                     mov rdi, r12
-                    sub rdi, r14
+                    sub rdi, rbx
                     mov rsi, r13
                     mov rdx, r15
+                    mov rcx, r14
 
                     cmp rdi, 0
                     jl .call
 
-                    cmp QWORD [r15 + 8 * rdi], -1
+                    cmp BYTE [r14 + rdi], 0
                     je .call
                     mov rax, QWORD [r15 + 8 * rdi]
                     jmp .after_call
@@ -403,15 +421,18 @@ AsmSequencesCountRecursion:
 .after_call:
                     add QWORD [rsp], rax
 
-                    inc r14
+                    dec rbx
                     jmp .loop_begin
 .loop_end:
+
                     mov rax, QWORD [rsp]
 
                     add rsp, 8
 
                     mov QWORD [r15 + 8 * r12], rax
+                    mov BYTE [r14 + r12], 1
 
+                    pop rbx
                     pop r15
                     pop r14
                     pop r13
