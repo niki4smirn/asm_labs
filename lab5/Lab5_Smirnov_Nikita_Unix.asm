@@ -6,9 +6,11 @@
                     global AsmGetMoreMagic
                     global AsmCopy
                     global AsmSequencesCount
+                    global AsmSequencesCountRecursion
 
                     extern GetMagic
                     extern malloc
+                    extern free
 
                     section .text
 
@@ -23,9 +25,10 @@ Metric:
 
 
 AsmFindNearest:
-                    cmp rdx, 1
+                    cmp edx, 1
                     je .no_r9
-                    push r9
+                    mov r10d, r9d
+                    push r10
 .no_r9:
                     push rbx
                     push r12
@@ -37,15 +40,21 @@ AsmFindNearest:
 
                     mov QWORD [rsp], 1
 
-                    mov r12, rdi
+                    mov r12d, edi
                     ; x in r12
-                    mov r13, rsi
+                    mov r13d, esi
                     ; y in r13
-                    mov r14, rdx
+                    mov r14d, edx
                     ; n in r14
 
-                    mov rdx, rcx
-                    mov rcx, r8
+                    shl rdi, 32
+                    shr rdi, 32
+
+                    shl rsi, 32
+                    shr rsi, 32
+
+                    mov edx, ecx
+                    mov ecx, r8d
 
                     call Metric
 
@@ -72,8 +81,8 @@ AsmFindNearest:
                     sub rdx, 8
 
 .no_fix:
-                    movsx rdx, DWORD [rdx]
-                    movsx rcx, DWORD [rcx]
+                    mov edx, DWORD [rdx]
+                    mov ecx, DWORD [rcx]
 
                     call Metric
 
@@ -171,7 +180,7 @@ AsmSummarizeRows:
 
 AsmCountIfNot:
                     ; &array in rdi
-                    ; size in esi
+                    ; size in si
                     ; &predicate in rdx
 
                     push rbx
@@ -182,7 +191,7 @@ AsmCountIfNot:
                     mov r12, rdi
                     ; &array in r12
 
-                    movsx r13, esi
+                    movzx r13, si
                     ; size in r13
                     dec r13
 
@@ -196,11 +205,11 @@ AsmCountIfNot:
                     cmp r13, 0
                     jl .loop_end
 
-                    movsx rdi, WORD [r12 + 2 * r13]
+                    mov di, WORD [r12 + 2 * r13]
 
                     call r15
 
-                    cmp rax, 0
+                    cmp al, 0
                     jne .not_update
                     inc rbx
 
@@ -284,8 +293,57 @@ AsmCopy:
                     ret
 
 AsmSequencesCount:
+
+                    push r12
+                    push r13
+
+                    mov r12, rdi
+                    mov r13, rsi
+
+                    inc rdi
+                    shl rdi, 3
+
+                    call malloc
+
+                    xor rcx, rcx
+
+.fill_loop_begin:
+                    cmp rcx, r12
+                    jg .fill_loop_end
+
+                    mov QWORD [rax + 8 * rcx], -1
+
+                    inc rcx
+                    jmp .fill_loop_begin
+.fill_loop_end:
+
+                    sub rsp, 8
+                    mov QWORD [rsp], rax
+                    mov rdi, r12
+                    mov rsi, r13
+                    mov rdx, rax
+
+                    call AsmSequencesCountRecursion
+
+                    push rbx
+                    mov rbx, rax
+
+                    mov rdi, QWORD [rsp + 8]
+                    call free
+
+                    mov rax, rbx
+
+                    pop rbx
+                    add rsp, 8
+
+                    pop r13
+                    pop r12
+                    ret
+
+AsmSequencesCountRecursion:
                     ; n in rdi
                     ; k in rsi
+                    ; buffer in rdx
 
                     cmp rdi, 0
                     jge .non_negative_n
@@ -304,15 +362,18 @@ AsmSequencesCount:
 .zero:
                     xor rax, rax
 .after_zero:
+                    mov QWORD [rdx + 8 * rdi], rax
                     ret
 
 .not_easy:
                     push r12
                     push r13
                     push r14
+                    push r15
 
                     mov r12, rdi
                     mov r13, rsi
+                    mov r15, rdx
 
                     sub rsp, 8
 
@@ -327,9 +388,19 @@ AsmSequencesCount:
                     mov rdi, r12
                     sub rdi, r14
                     mov rsi, r13
+                    mov rdx, r15
 
-                    call AsmSequencesCount
+                    cmp rdi, 0
+                    jl .call
 
+                    cmp QWORD [r15 + 8 * rdi], -1
+                    je .call
+                    mov rax, QWORD [r15 + 8 * rdi]
+                    jmp .after_call
+.call:
+                    call AsmSequencesCountRecursion
+
+.after_call:
                     add QWORD [rsp], rax
 
                     inc r14
@@ -339,6 +410,9 @@ AsmSequencesCount:
 
                     add rsp, 8
 
+                    mov QWORD [r15 + 8 * r12], rax
+
+                    pop r15
                     pop r14
                     pop r13
                     pop r12
