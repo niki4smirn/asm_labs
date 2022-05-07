@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 extern "C" char* AsmStrChr(const char* s, char c);
+extern "C" void AsmStrCpy(char* dst, const char* src);
 
 // ---------------------------------------------------------
 
@@ -49,4 +50,24 @@ TEST(AsmStrChr, Simple) {
   EXPECT_EQ(AsmStrChr(str, 'b') - str, 1);
   EXPECT_EQ(AsmStrChr(str, 'c') - str, 3);
   EXPECT_EQ(AsmStrChr(str, 'e') - str, 6);
+}
+
+TEST(AsmStrCpy, Simple) {
+  const char* src = "abacabe";
+  const int size = 8;
+  {
+    char* dst = new char[size];
+    AsmStrCpy(dst, src);
+    dst[size - 1] = 0;
+    EXPECT_STREQ(dst, src);
+  }
+  {
+    char* dst = new char[size];
+    for (int i = 0; i < size; ++i) {
+      dst[i] = i;
+    }
+    AsmStrCpy(dst, src);
+    dst[size - 1] = 0;
+    EXPECT_STREQ(dst, src);
+  }
 }

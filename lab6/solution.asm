@@ -1,4 +1,5 @@
                     global AsmStrChr
+                    global AsmStrCpy
 
                     section .text
 GetLen:
@@ -42,4 +43,26 @@ AsmStrChr:
 .not_found:
                     mov rax, 0
 .return:
+                    ret
+
+AsmStrCpy:
+                    push r12
+                    push r13
+
+                    mov r12, rsi
+                    mov r13, rdi
+
+                    mov rdi, rsi
+
+                    call GetLen
+
+                    mov rsi, r12
+                    mov rdi, r13
+
+                    pop r13
+                    pop r12
+
+                    mov ecx, eax
+                    rep movsb
+
                     ret
