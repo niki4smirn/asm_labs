@@ -2,6 +2,7 @@
                     global AsmStrCpy
                     global AsmStrNCpy
                     global AsmStrCat
+                    global AsmStrStr
 
                     section .text
 GetLen:
@@ -143,6 +144,50 @@ AsmStrCat:
 
                     mov BYTE [rdi], 0
 
+                    pop r14
+                    pop r13
+                    pop r12
+                    ret
+
+AsmStrStr:
+                    push r12
+                    push r13
+                    push r14
+
+                    mov r12, rdi
+                    mov r13, rsi
+
+                    call GetLen
+
+                    mov r14, rax
+
+                    mov rdi, r13
+
+                    call GetLen
+
+                    xor r8, r8
+                    sub r14, rax
+                    inc eax
+.loop_begin:
+                    cmp r8, r14
+                    jg .loop_end
+
+                    mov ecx, eax
+                    lea rdi, [r12 + r8]
+                    mov rsi, r13
+
+                    cld
+                    repe cmpsb
+                    jecxz .found
+
+                    inc r8
+                    jmp .loop_begin
+.loop_end:
+                    xor rax, rax
+                    jmp .end
+.found:
+                    lea rax, [r12 + r8]
+.end:
                     pop r14
                     pop r13
                     pop r12
