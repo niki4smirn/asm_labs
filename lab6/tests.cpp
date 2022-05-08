@@ -2,6 +2,7 @@
 
 extern "C" char* AsmStrChr(const char* s, char c);
 extern "C" void AsmStrCpy(char* dst, const char* src);
+extern "C" int AsmStrNCpy(char* dst, const char* src, uint32_t size);
 
 // ---------------------------------------------------------
 
@@ -68,6 +69,36 @@ TEST(AsmStrCpy, Simple) {
     }
     AsmStrCpy(dst, src);
     dst[size - 1] = 0;
+    EXPECT_STREQ(dst, src);
+  }
+  {
+    char* dst = new char[]{"abacabeabacabe"};
+    AsmStrCpy(dst, src);
+    EXPECT_STREQ(dst, "abacabeabacabe");
+  }
+}
+
+TEST(AsmStrNCpy, Simple) {
+  const char* src = "abacabe";
+  const int size = 8;
+  {
+    char* dst = new char[size]{"aba"};
+    AsmStrNCpy(dst, src, size - 1);
+    EXPECT_STREQ(dst, src);
+  }
+  {
+    char* dst = new char[size + 4]{"abaaaaaaaaa"};
+    AsmStrNCpy(dst, src, size - 1);
+    EXPECT_STREQ(dst, "abacabeaaaa");
+  }
+  {
+    char* dst = new char[size + 4]{"aaaaaaaaaaa"};
+    AsmStrNCpy(dst, src, 2);
+    EXPECT_STREQ(dst, "abaaaaaaaaa");
+  }
+  {
+    char* dst = new char[size + 4]{"aaaaaaaaaaa"};
+    AsmStrNCpy(dst, src, 10);
     EXPECT_STREQ(dst, src);
   }
 }

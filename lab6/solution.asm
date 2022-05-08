@@ -1,5 +1,6 @@
                     global AsmStrChr
                     global AsmStrCpy
+                    global AsmStrNCpy
 
                     section .text
 GetLen:
@@ -64,5 +65,49 @@ AsmStrCpy:
 
                     mov ecx, eax
                     rep movsb
+
+                    ret
+
+AsmStrNCpy:
+                    push r12
+                    push r13
+                    push r14
+
+                    mov r12, rdi
+                    mov r13, rsi
+                    mov r14d, edx
+
+                    call GetLen
+
+                    cmp eax, r14d
+                    jge .no_end_zero1
+                    mov BYTE [r12 + r14], 0
+
+.no_end_zero1:
+                    mov rdi, r13
+
+                    call GetLen
+
+                    cmp eax, r14d
+                    jge .no_end_zero2
+                    mov BYTE [r12 + rax], 0
+
+.no_end_zero2:
+
+                    mov rdi, r12
+                    mov rsi, r13
+                    mov ecx, r14d
+
+                    cmp ecx, eax
+                    jle .size_le
+                    mov ecx, eax
+
+.size_le:
+
+                    rep movsb
+
+                    pop r14
+                    pop r13
+                    pop r12
 
                     ret
