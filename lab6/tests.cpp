@@ -5,6 +5,9 @@ extern "C" void AsmStrCpy(char* dst, const char* src);
 extern "C" void AsmStrNCpy(char* dst, const char* src, uint32_t size);
 extern "C" char* AsmStrCat(char* dst, const char* src);
 extern "C" char* AsmStrStr(const char* str, const char* substr);
+extern "C" int64_t AsmStrToInt64(const char* s);
+extern "C" void AsmIntToStr64(int64_t x, int32_t b, char* s);
+extern "C" bool AsmSafeStrToUInt64(const char* s, uint64_t* result);
 
 // ---------------------------------------------------------
 
@@ -142,5 +145,194 @@ TEST(AsmStrStr, Basic) {
     const char* source = "longlona";
     const char* dest = "bobalonglong";
     ASSERT_STREQ(AsmStrStr(dest, source), nullptr);
+  }
+}
+
+TEST(AsmStrToInt64, Basic) {
+  {
+    const char* val = "-5";
+    ASSERT_EQ(AsmStrToInt64(val), -5);
+  }
+  {
+    const char* val = "-50";
+    ASSERT_EQ(AsmStrToInt64(val), -50);
+  }
+  {
+    const char* val = "22801488";
+    ASSERT_EQ(AsmStrToInt64(val), 22801488);
+  }
+}
+
+TEST(AsmIntToStr64, Basic) {
+  /// bad base
+  {
+    char result[50];
+    const char* need = "";
+    AsmIntToStr64(228, 11, result);
+    ASSERT_STREQ(result, need);
+  }
+  {
+    char result[50];
+    const char* need = "";
+    AsmIntToStr64(228, 228, result);
+    ASSERT_STREQ(result, need);
+  }
+
+  /// binary
+  {
+    char result[50];
+    const char* need = "110";
+    AsmIntToStr64(6, 2, result);
+    ASSERT_STREQ(result, need);
+  }
+  {
+    char result[50];
+    const char* need = "-101";
+    AsmIntToStr64(-5, 2, result);
+    ASSERT_STREQ(result, need);
+  }
+  {
+    char result[50];
+    const char* need = "11010";
+    AsmIntToStr64(26, 2, result);
+    ASSERT_STREQ(result, need);
+  }
+  {
+    char result[50];
+    const char* need = "-11010";
+    AsmIntToStr64(-26, 2, result);
+    ASSERT_STREQ(result, need);
+  }
+
+  /// octal
+  {
+    char result[50];
+    const char* need = "5";
+    AsmIntToStr64(5, 8, result);
+    ASSERT_STREQ(result, need);
+  }
+  {
+    char result[50];
+    const char* need = "-5";
+    AsmIntToStr64(-5, 8, result);
+    ASSERT_STREQ(result, need);
+  }
+  {
+    char result[50];
+    const char* need = "32";
+    AsmIntToStr64(26, 8, result);
+    ASSERT_STREQ(result, need);
+  }
+  {
+    char result[50];
+    const char* need = "-15753";
+    AsmIntToStr64(-7147, 8, result);
+    ASSERT_STREQ(result, need);
+  }
+  {
+    char result[50];
+    const char* need = "15753";
+    AsmIntToStr64(7147, 8, result);
+    ASSERT_STREQ(result, need);
+  }
+
+
+  /// hexadecimal
+  {
+    char result[50];
+    const char* need = "5";
+    AsmIntToStr64(5, 16, result);
+    ASSERT_STREQ(result, need);
+  }
+  {
+    char result[50];
+    const char* need = "-5";
+    AsmIntToStr64(-5, 16, result);
+    ASSERT_STREQ(result, need);
+  }
+  {
+    char result[50];
+    const char* need = "1A";
+    AsmIntToStr64(26, 16, result);
+    ASSERT_STREQ(result, need);
+  }
+  {
+    char result[50];
+    const char* need = "-1BEB";
+    AsmIntToStr64(-7147, 16, result);
+    ASSERT_STREQ(result, need);
+  }
+  {
+    char result[50];
+    const char* need = "1BEB";
+    AsmIntToStr64(7147, 16, result);
+    ASSERT_STREQ(result, need);
+  }
+
+  /// decimal
+  for (int i = -1000000; i <= 1000000; i++) {
+    char result[50];
+    std::string need = std::to_string(i);
+    AsmIntToStr64(i, 10, result);
+    ASSERT_STREQ(result, need.c_str());
+  }
+}
+
+TEST(AsmSafeStrToUInt64, Basic) {
+  {
+    const char* val = "-5";
+    uint64_t ptr = 3701713071;
+    uint64_t old = ptr;
+    ASSERT_FALSE(AsmSafeStrToUInt64(val, &ptr));
+    ASSERT_EQ(old, ptr);
+  }
+  {
+    const char* val = "-5";
+    uint64_t ptr = 3701713071;
+    uint64_t old = ptr;
+    ASSERT_FALSE(AsmSafeStrToUInt64(val, &ptr));
+    ASSERT_EQ(old, ptr);
+  }
+  {
+    const char* val = "22801488";
+    uint64_t ptr = 3701713071;
+    uint64_t old = ptr;
+    ASSERT_TRUE(AsmSafeStrToUInt64(val, &ptr));
+    ASSERT_EQ(ptr, 22801488);
+  }
+  {
+    const char* val = "18446744073709551615";
+    uint64_t ptr = 3701713071;
+    uint64_t old = ptr;
+    ASSERT_TRUE(AsmSafeStrToUInt64(val, &ptr));
+    ASSERT_EQ(ptr, 18446744073709551615ull);
+  }
+  {
+    const char* val = "00000000000000000018446744073709551615";
+    uint64_t ptr = 3701713071;
+    uint64_t old = ptr;
+    ASSERT_TRUE(AsmSafeStrToUInt64(val, &ptr));
+    ASSERT_EQ(ptr, 18446744073709551615ull);
+  }
+  {
+    const char* val = "228o1488";
+    uint64_t ptr = 3701713071;
+    uint64_t old = ptr;
+    ASSERT_FALSE(AsmSafeStrToUInt64(val, &ptr));
+    ASSERT_EQ(old, ptr);
+  }
+  {
+    const char* val = "18446744073709551616";
+    uint64_t ptr = 3701713071;
+    uint64_t old = ptr;
+    ASSERT_FALSE(AsmSafeStrToUInt64(val, &ptr));
+    ASSERT_EQ(old, ptr);
+  }
+  {
+    const char* val = "3016701673190176091376713067130677310";
+    uint64_t ptr = 3701713071;
+    uint64_t old = ptr;
+    ASSERT_FALSE(AsmSafeStrToUInt64(val, &ptr));
+    ASSERT_EQ(old, ptr);
   }
 }

@@ -3,6 +3,9 @@
                     global AsmStrNCpy
                     global AsmStrCat
                     global AsmStrStr
+                    global AsmStrToInt64
+                    global AsmIntToStr64
+                    global AsmSafeStrToUInt64
 
                     section .text
 GetLen:
@@ -68,6 +71,7 @@ AsmStrCpy:
                     mov ecx, eax
                     cld
                     rep movsb
+                    mov BYTE [rdi], 0
 
                     ret
 
@@ -191,4 +195,196 @@ AsmStrStr:
                     pop r14
                     pop r13
                     pop r12
+                    ret
+
+
+AsmStrToInt64:
+                    xor rax, rax
+                    mov r10, 10
+                    xor rsi, rsi
+                    cmp BYTE [rdi], '-'
+                    jne .loop_begin
+                    mov rsi, 1
+                    inc rdi
+
+.loop_begin:
+                    cmp BYTE [rdi], 0
+                    je .loop_end
+                    movzx r8, BYTE [rdi]
+                    sub r8, '0'
+
+                    mul r10
+                    add rax, r8
+
+                    inc rdi
+                    jmp .loop_begin
+.loop_end:
+                    cmp rsi, 1
+                    jne .return
+                    neg rax
+
+.return:
+                    ret
+
+ReverseStr:
+                    push r12
+                    mov r12, rdi
+                    call GetLen
+
+                    xor r8, r8
+                    mov r9, rax
+                    dec r9
+                    ; l in r8, r in r9
+.loop_begin:
+                    cmp r8, r9
+                    jge .loop_end
+
+                    xchg BYTE [r12 + r8], al
+                    xchg BYTE [r12 + r9], al
+                    xchg BYTE [r12 + r8], al
+
+                    inc r8
+                    dec r9
+
+                    jmp .loop_begin
+.loop_end:
+                    pop r12
+                    ret
+
+IntToChar:
+                    cmp dil, 10
+                    jl .number
+
+                    sub dil, 10
+                    mov al, dil
+                    add al, 'A'
+
+                    jmp .return
+.number:
+                    mov al, dil
+                    add al, '0'
+.return:
+                    ret
+
+IsCorrectBase:
+                    xor al, al
+
+                    cmp edi, 2
+                    je .correct
+
+                    cmp edi, 8
+                    je .correct
+
+                    cmp edi, 10
+                    je .correct
+
+                    cmp edi, 16
+                    je .correct
+
+
+                    jmp .return
+.correct:
+                    mov al, 1
+.return:
+                    ret
+
+AsmIntToStr64:
+                    push r12
+                    push r13
+                    push r14
+                    push r15
+                    push rbx
+
+                    mov r12, rdi
+                    movsx r13, esi
+                    mov r14, rdx
+                    mov rbx, rdx
+
+                    xor r15, r15
+                    cmp r12, 0
+                    jge .non_neg
+                    mov r15, 1
+                    neg r12
+.non_neg:
+                    mov edi, r13d
+
+                    call IsCorrectBase
+
+                    cmp al, 0
+                    je .incorrect_base
+
+.loop_begin:
+                    cmp r12, 0
+                    jle .loop_end
+
+                    mov rax, r12
+                    cqo
+                    div r13
+                    mov r12, rax
+                    mov rdi, rdx
+                    call IntToChar
+                    mov BYTE [r14], al
+                    inc r14
+
+                    jmp .loop_begin
+.loop_end:
+                    cmp r14, rbx
+                    jne .non_empty
+                    mov BYTE [r14], '0'
+                    inc r14
+.non_empty:
+                    cmp r15, 1
+                    jne .non_neg2
+                    mov BYTE [r14], '-'
+                    inc r14
+.non_neg2:
+                    mov BYTE [r14], 0
+                    mov rdi, rbx
+                    call ReverseStr
+                    jmp .return
+.incorrect_base:
+                    mov BYTE [r14], 0
+
+.return:
+                    pop rbx
+                    pop r15
+                    pop r14
+                    pop r13
+                    pop r12
+                    ret
+
+AsmSafeStrToUInt64:
+                    xor rax, rax
+                    mov r10, 10
+                    cmp BYTE [rdi], '-'
+                    je .bad
+
+.loop_begin:
+                    cmp BYTE [rdi], 0
+                    je .loop_end
+
+                    mul r10
+                    jc .bad
+
+                    movzx r8, BYTE [rdi]
+                    sub r8, '0'
+
+                    cmp r8, 0
+                    jl .bad
+
+                    cmp r8, 9
+                    jg .bad
+
+                    add rax, r8
+                    jc .bad
+
+                    inc rdi
+                    jmp .loop_begin
+.loop_end:
+                    mov QWORD [rsi], rax
+                    mov rax, 1
+                    jmp .return
+.bad:
+                    xor rax, rax
+.return:
                     ret
