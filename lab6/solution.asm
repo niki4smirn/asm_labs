@@ -1,6 +1,7 @@
                     global AsmStrChr
                     global AsmStrCpy
                     global AsmStrNCpy
+                    global AsmStrCat
 
                     section .text
 GetLen:
@@ -64,6 +65,7 @@ AsmStrCpy:
                     pop r12
 
                     mov ecx, eax
+                    cld
                     rep movsb
 
                     ret
@@ -104,10 +106,44 @@ AsmStrNCpy:
 
 .size_le:
 
+                    cld
                     rep movsb
 
                     pop r14
                     pop r13
                     pop r12
 
+                    ret
+
+AsmStrCat:
+                    push r12
+                    push r13
+                    push r14
+
+                    mov r12, rdi
+                    mov r13, rsi
+                    mov r14, rdi
+
+                    call GetLen
+
+                    add r12, rax
+
+                    mov rdi, r13
+
+                    call GetLen
+
+                    mov ecx, eax
+                    mov rax, r14
+
+                    mov rdi, r12
+                    mov rsi, r13
+
+                    cld
+                    rep movsb
+
+                    mov BYTE [rdi], 0
+
+                    pop r14
+                    pop r13
+                    pop r12
                     ret

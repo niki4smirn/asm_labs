@@ -2,7 +2,8 @@
 
 extern "C" char* AsmStrChr(const char* s, char c);
 extern "C" void AsmStrCpy(char* dst, const char* src);
-extern "C" int AsmStrNCpy(char* dst, const char* src, uint32_t size);
+extern "C" void AsmStrNCpy(char* dst, const char* src, uint32_t size);
+extern "C" char* AsmStrCat(char* dst, const char* src);
 
 // ---------------------------------------------------------
 
@@ -100,5 +101,22 @@ TEST(AsmStrNCpy, Simple) {
     char* dst = new char[size + 4]{"aaaaaaaaaaa"};
     AsmStrNCpy(dst, src, 10);
     EXPECT_STREQ(dst, src);
+  }
+}
+
+TEST(AsmStrCat, Basic) {
+  {
+    const char* source = "longlong";
+    char dest[18] = {'a','g','\0','h','d','h','j','s','k',
+                     'h','j','k','f','d','h','k','d','h'};
+    const char* need = "aglonglong";
+    ASSERT_STREQ(AsmStrCat(dest, source), need);
+  }
+  {
+    const char* source = "longlong";
+    char dest[18] = {'a','g','h','d','h','j','s','k','\0',
+                     'h','j','k','f','d','h','k','d','h'};
+    const char* need = "aghdhjsklonglong";
+    ASSERT_STREQ(AsmStrCat(dest, source), need);
   }
 }
